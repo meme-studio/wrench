@@ -1,8 +1,7 @@
-package io.meme.joke.classscanner;
+package io.meme.joke.classscanner.message;
 
+import io.meme.joke.classscanner.utils.AccessUtils;
 import jdk.internal.org.objectweb.asm.Label;
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.Opcodes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,7 +19,15 @@ public class MethodMessage extends MethodResolver implements Serializable {
     private String name;
     private String desc;
     private List<ArgumentMessage> argumentMessages;
-    private boolean staticMethod;
+    private int access;
+
+    public boolean isAbstract() {
+        return AccessUtils.isAbstract(access);
+    }
+
+    public boolean isStatic() {
+        return AccessUtils.isStatic(access);
+    }
 
     //TODO
     @Override
@@ -39,9 +46,4 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return null;
     }
 
-}
-abstract class MethodResolver extends MethodVisitor {
-    MethodResolver() {
-        super(Opcodes.ASM5);
-    }
 }

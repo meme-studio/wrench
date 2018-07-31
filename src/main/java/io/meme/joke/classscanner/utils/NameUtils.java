@@ -1,9 +1,13 @@
 package io.meme.joke.classscanner.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * @author meme
  * @since 2018/7/27
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NameUtils {
 
     public static String calcSimpleClassName(String longClassName) {

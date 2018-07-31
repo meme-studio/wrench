@@ -1,8 +1,7 @@
-package io.meme.joke.classscanner;
+package io.meme.joke.classscanner.message;
 
+import io.meme.joke.classscanner.utils.AccessUtils;
 import io.meme.joke.classscanner.utils.NameUtils;
-import jdk.internal.org.objectweb.asm.FieldVisitor;
-import jdk.internal.org.objectweb.asm.Opcodes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,11 +12,14 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(staticName = "of")
 public class FieldMessage extends FieldResolver {
-
     private static final long serialVersionUID = 2648987017868206269L;
     private String name;
     private String longTypeName;
-    private boolean staticField;
+    private int access;
+
+    public boolean isStatic() {
+        return AccessUtils.isStatic(access);
+    }
 
     private String getTypeName() {
         return NameUtils.calcSimpleClassName(longTypeName);
@@ -25,9 +27,3 @@ public class FieldMessage extends FieldResolver {
 
 }
 
-abstract class FieldResolver extends FieldVisitor {
-
-    FieldResolver() {
-        super(Opcodes.ASM5);
-    }
-}

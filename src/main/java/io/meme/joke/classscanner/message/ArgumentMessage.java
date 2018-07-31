@@ -1,4 +1,4 @@
-package io.meme.joke.classscanner;
+package io.meme.joke.classscanner.message;
 
 import io.meme.joke.classscanner.utils.NameUtils;
 import lombok.AllArgsConstructor;
