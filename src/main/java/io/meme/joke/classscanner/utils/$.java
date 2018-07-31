@@ -46,7 +46,7 @@ public final class $ {
         return path.substring(path.lastIndexOf("."));
     }
 
-    public static ClassFileType getClassFileType(String path) {
+    public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
                 Case($(is(JAR.getSuffixName())), JAR),
                 Case($(is(CLASS.getSuffixName())), CLASS),

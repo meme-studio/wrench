@@ -120,7 +120,7 @@ public class ClassScanner {
                     .parallel()
                     .map(Path::toString)
                     .filter($::isClassFileType)
-                    .collect(collectingAndThen(groupingBy($::getClassFileType), this::scan));
+                    .collect(collectingAndThen(groupingBy($::determineClassFileType), this::scan));
     }
 
     private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> pathGroup) {
