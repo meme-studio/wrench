@@ -8,7 +8,6 @@ import jdk.internal.org.objectweb.asm.Opcodes;
  * @since 2018/7/30
  */
 abstract class FieldResolver extends FieldVisitor {
-
     FieldResolver() {
         super(Opcodes.ASM5);
     }

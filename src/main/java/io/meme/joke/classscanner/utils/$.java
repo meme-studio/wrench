@@ -2,7 +2,6 @@ package io.meme.joke.classscanner.utils;
 
 import io.meme.joke.classscanner.message.ClassMessage;
 import jdk.internal.org.objectweb.asm.ClassReader;
-import jdk.internal.org.objectweb.asm.tree.ClassNode;
 import lombok.*;
 
 import java.io.InputStream;
@@ -61,13 +60,12 @@ public final class $ {
                     .getInputStream(jarEntry);
     }
 
-    //TODO
     @SneakyThrows
     public static ClassMessage determineClassMessage(InputStream is) {
         ClassReader reader = new ClassReader(is);
-        ClassNode node = new ClassNode();
-        reader.accept(node, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-        return null;
+        ClassMessage classMessage = new ClassMessage();
+        reader.accept(classMessage, 0);
+        return classMessage;
     }
 
 

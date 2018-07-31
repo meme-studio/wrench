@@ -19,6 +19,6 @@ public final class NameUtils {
     }
 
     public static String calcInternalName(String name) {
-        return name.replace('.', '/');
+        return name.replace('/', '.');
     }
 }

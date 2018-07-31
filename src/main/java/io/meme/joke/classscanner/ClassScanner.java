@@ -2,10 +2,8 @@ package io.meme.joke.classscanner;
 
 import io.meme.joke.classscanner.message.ClassMessage;
 import io.meme.joke.classscanner.utils.$;
-import io.vavr.*;
-import lombok.AccessLevel;
+import io.vavr.API;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -14,14 +12,18 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 import static io.meme.joke.classscanner.utils.$.ClassFileType.CLASS;
 import static io.meme.joke.classscanner.utils.$.ClassFileType.JAR;
-import static io.vavr.API.*;
+import static io.vavr.API.Function;
+import static io.vavr.API.unchecked;
 import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
@@ -32,7 +34,6 @@ import static java.util.stream.Collectors.*;
  */
 @Log
 @Builder
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClassScanner {
 
     private boolean ignoreMethodVisibility;
@@ -41,47 +42,47 @@ public class ClassScanner {
 
     private boolean ignoreFieldVisibility;
 
-    private List<String> includePackages;
+    @Builder.Default
+    private List<String> includePackages = emptyList();
 
-    private List<String> excludePackages;
+    @Builder.Default
+    private List<String> excludePackages = emptyList();
 
+    @Builder.Default
     private String javaHome = System.getProperty("java.home");
 
+    @Builder.Default
     private String classpath = Objects.requireNonNull(Thread.currentThread()
                                                             .getContextClassLoader()
                                                             .getResource("/"))
                                       .getPath();
 
     public static ClassScanner allPackages() {
-        return initialPackagesScanning().build();
+        return ClassScanner.builder().build();
     }
 
     public static ClassScanner includePackages(String... packageNames) {
-        return initialPackagesScanning().includePackages(Arrays.asList(packageNames))
-                                        .build();
+        return ClassScanner.builder()
+                           .includePackages(Arrays.asList(packageNames))
+                           .build();
     }
 
     public static ClassScanner excludePackages(String... packageNames) {
-        return initialPackagesScanning().excludePackages(Arrays.asList(packageNames))
-                                        .build();
+        return ClassScanner.builder()
+                           .excludePackages(Arrays.asList(packageNames))
+                           .build();
     }
 
     public static ClassScanner disableJavaHomeScanning() {
-        return initialPackagesScanning()
-                .javaHome(null)
-                .build();
+        return ClassScanner.builder()
+                           .javaHome(null)
+                           .build();
     }
 
     public static ClassScanner disableClassPathScanning() {
-        return initialPackagesScanning()
-                .classpath(null)
-                .build();
-    }
-
-    private static ClassScannerBuilder initialPackagesScanning() {
         return ClassScanner.builder()
-                           .includePackages(emptyList())
-                           .excludePackages(emptyList());
+                           .classpath(null)
+                           .build();
     }
 
     public ClassScanner ignoreMethodVisibility() {

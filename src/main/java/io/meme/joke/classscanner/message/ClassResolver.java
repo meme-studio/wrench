@@ -11,5 +11,4 @@ abstract class ClassResolver extends ClassVisitor {
     ClassResolver() {
         super(Opcodes.ASM5);
     }
-
 }
