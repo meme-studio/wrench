@@ -69,12 +69,16 @@ public final class $ {
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         ClassReader reader = new ClassReader(is);
-        if ((IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0 || AccessUtils.isPublic(reader.getAccess())) {
+        if (isIgnoreClassVisibility(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess())) {
             ClassMessage classMessage = new ClassMessage();
             reader.accept(classMessage, 0);
             return classMessage;
         }
         return null;
+    }
+
+    private static boolean isIgnoreClassVisibility(int ignoreVisibilities) {
+        return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;
     }
 
 
