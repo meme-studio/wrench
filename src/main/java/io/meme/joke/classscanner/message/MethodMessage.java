@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,7 +19,6 @@ public class MethodMessage extends MethodResolver implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
     private String name;
     private String desc;
-    private List<ArgumentMessage> argumentMessages;
     private int access;
 
     public boolean isAbstract() {
@@ -27,6 +27,11 @@ public class MethodMessage extends MethodResolver implements Serializable {
 
     public boolean isStatic() {
         return AccessUtils.isStatic(access);
+    }
+
+    //TODO
+    public List<ArgumentMessage> getArgumentMessages() {
+        return Collections.emptyList();
     }
 
     //TODO

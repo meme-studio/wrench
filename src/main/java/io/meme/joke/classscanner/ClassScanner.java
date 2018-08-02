@@ -36,11 +36,8 @@ import static java.util.stream.Collectors.*;
 @Builder
 public class ClassScanner {
 
-    private boolean ignoreMethodVisibility;
-
-    private boolean ignoreClassVisibility;
-
-    private boolean ignoreFieldVisibility;
+    @Builder.Default
+    private int ignoreVisibilities;
 
     @Builder.Default
     private List<String> includePackages = emptyList();
@@ -86,24 +83,22 @@ public class ClassScanner {
     }
 
     public ClassScanner ignoreMethodVisibility() {
-        ignoreMethodVisibility = true;
+        ignoreVisibilities |= $.IGNORE_METHOD_VISIBILITY;
         return this;
     }
 
     public ClassScanner ignoreClassVisibility() {
-        ignoreClassVisibility = true;
+        ignoreVisibilities |= $.IGNORE_CLASS_VISIBILITY;
         return this;
     }
 
     public ClassScanner ignoreFieldVisibility() {
-        ignoreFieldVisibility = true;
+        ignoreVisibilities |= $.IGNORE_FIELD_VISIBILITY;
         return this;
     }
 
     public ClassScanner ignoreVisibility() {
-        return this.ignoreFieldVisibility()
-                   .ignoreClassVisibility()
-                   .ignoreMethodVisibility();
+        return ignoreFieldVisibility().ignoreClassVisibility().ignoreMethodVisibility();
     }
 
     public Result scan() {
@@ -134,7 +129,7 @@ public class ClassScanner {
         return paths.stream()
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map($::determineClassMessage);
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -153,7 +148,8 @@ public class ClassScanner {
         return entry.getValue()
                     .filter(jarEntry -> $.isClassFileType(jarEntry.getName()))
                     .map(Function($::getClassInputStream).apply(entry))
-                    .map($::determineClassMessage);
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities))
+                    .filter(Objects::nonNull);
     }
 
 }

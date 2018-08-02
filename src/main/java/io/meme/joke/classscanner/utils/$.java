@@ -30,6 +30,12 @@ public final class $ {
         private String suffixName;
     }
 
+    public static final int IGNORE_CLASS_VISIBILITY = 1;
+
+    public static final int IGNORE_FIELD_VISIBILITY = 2;
+
+    public static final int IGNORE_METHOD_VISIBILITY = 4;
+
     public static boolean isClassFileType(String path) {
         return isJarType(path) || isClassType(path);
     }
@@ -61,11 +67,14 @@ public final class $ {
     }
 
     @SneakyThrows
-    public static ClassMessage determineClassMessage(InputStream is) {
+    public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         ClassReader reader = new ClassReader(is);
-        ClassMessage classMessage = new ClassMessage();
-        reader.accept(classMessage, 0);
-        return classMessage;
+        if ((IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0 || AccessUtils.isPublic(reader.getAccess())) {
+            ClassMessage classMessage = new ClassMessage();
+            reader.accept(classMessage, 0);
+            return classMessage;
+        }
+        return null;
     }
 
 

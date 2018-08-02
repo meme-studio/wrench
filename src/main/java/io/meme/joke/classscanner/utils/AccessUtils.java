@@ -14,15 +14,19 @@ public class AccessUtils {
         return (Opcodes.ACC_ABSTRACT & access) > 0;
     }
 
-    public static  boolean isInterface(int access) {
+    public static boolean isInterface(int access) {
         return (Opcodes.ACC_INTERFACE & access) > 0;
     }
 
-    public static  boolean isEnum(int access) {
+    public static boolean isEnum(int access) {
         return (Opcodes.ACC_ENUM & access) > 0;
     }
 
-    public static  boolean isStatic(int access) {
+    public static boolean isStatic(int access) {
         return ((Opcodes.ACC_STATIC) & access) > 0;
+    }
+
+    public static boolean isPublic(int access) {
+        return ((Opcodes.ACC_PUBLIC) & access) > 0;
     }
 }

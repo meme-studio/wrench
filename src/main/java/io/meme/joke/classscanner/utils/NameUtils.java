@@ -3,6 +3,8 @@ package io.meme.joke.classscanner.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author meme
  * @since 2018/7/27
@@ -20,5 +22,15 @@ public final class NameUtils {
 
     public static String calcInternalName(String name) {
         return name.replace('/', '.');
+    }
+
+    //TODO
+    public static List<String> calcInterfaceNames(String signature) {
+        return null;
+    }
+
+    //TODO
+    public static String calcSuperClassName(String signature) {
+        return null;
     }
 }

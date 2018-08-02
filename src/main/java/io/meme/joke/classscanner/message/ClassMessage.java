@@ -17,8 +17,18 @@ public class ClassMessage extends ClassResolver {
     private static final long serialVersionUID = -5621028783726663753L;
     private String name;
     private int access;
+    private String signature;
     private List<MethodMessage> methodMessages = new ArrayList<>();
     private List<FieldMessage> fieldMessages = new ArrayList<>();
+    private int ignoreVisibilities;
+
+    public List<String> getInterfaceNames() {
+        return NameUtils.calcInterfaceNames(signature);
+    }
+
+    public String getSuperClassName() {
+        return NameUtils.calcSuperClassName(signature);
+    }
 
     public String getSimpleName() {
         return NameUtils.calcSimpleClassName(name);
@@ -47,13 +57,8 @@ public class ClassMessage extends ClassResolver {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.name = NameUtils.calcInternalName(name);
+        this.signature = signature;
         this.access = access;
-    }
-
-    //TODO
-    @Override
-    public void visitInnerClass(String name, String outerName, String innerName, int access) {
-        super.visitInnerClass(name, outerName, innerName, access);
     }
 
     @Override
@@ -65,7 +70,7 @@ public class ClassMessage extends ClassResolver {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        MethodMessage method = MethodMessage.of(name, desc, new ArrayList<>(), access);
+        MethodMessage method = MethodMessage.of(name, desc, access);
         methodMessages.add(method);
         return method;
     }
