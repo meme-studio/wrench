@@ -13,7 +13,7 @@ class ClassMessageTest {
     void testCreateInstance() throws IOException {
         String internalName = Type.getObjectType("java/util/ArrayList").getClassName();
         ClassReader classReader = new ClassReader("java.util.ArrayList");
-        ClassMessage classMessage = new ClassMessage();
+        ClassMessage classMessage = ClassMessage.of(0);
         classReader.accept(classMessage, ClassReader.EXPAND_FRAMES);
 
         ClassNode classNode = new ClassNode();

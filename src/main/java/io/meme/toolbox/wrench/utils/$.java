@@ -77,7 +77,7 @@ public final class $ {
         return (isIgnoreClassVisibility(ignoreVisibilities)
                 || AccessUtils.isPublic(reader.getAccess()))
                 && isExtend(superName, interfaces, reader)
-                ? getClassMessage(reader) : null;
+                ? getClassMessage(reader, ignoreVisibilities) : null;
     }
 
     private static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
@@ -85,14 +85,23 @@ public final class $ {
                      .allMatch(isIn(reader.getInterfaces()).or(is(reader.getSuperName())));
     }
 
-    private static ClassMessage getClassMessage(ClassReader reader) {
-        ClassMessage classMessage = new ClassMessage();
+    private static ClassMessage getClassMessage(ClassReader reader, int ignoreVisibilities) {
+        ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
         reader.accept(classMessage, 0);
         return classMessage;
     }
 
-    private static boolean isIgnoreClassVisibility(int ignoreVisibilities) {
+    public static boolean isIgnoreClassVisibility(int ignoreVisibilities) {
         return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;
+    }
+
+    public static boolean isIgnoreFieldVisibility(int ignoreVisibilities) {
+        return (IGNORE_FIELD_VISIBILITY & ignoreVisibilities) > 0;
+    }
+
+
+    public static boolean isIgnoreMethodVisibility(int ignoreVisibilities) {
+        return (IGNORE_METHOD_VISIBILITY & ignoreVisibilities) > 0;
     }
 
 

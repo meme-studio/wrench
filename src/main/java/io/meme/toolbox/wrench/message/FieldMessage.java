@@ -12,13 +12,14 @@ import java.io.Serializable;
  * @author meme
  * @since 2018/7/27
  */
-@Getter
 @AllArgsConstructor(staticName = "of")
 public class FieldMessage extends FieldResolver implements Serializable {
     private static final long serialVersionUID = 2648987017868206269L;
-    private String name;
-    private String longTypeName;
-    private int access;
+    @Getter
+    private final String name;
+    @Getter
+    private final String longTypeName;
+    private final int access;
 
     public boolean isStatic() {
         return AccessUtils.isStatic(access);
