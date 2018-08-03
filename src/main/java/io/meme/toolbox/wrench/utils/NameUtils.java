@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author meme
@@ -13,15 +14,17 @@ import java.util.List;
 public final class NameUtils {
 
     public static String calcSimpleClassName(String longClassName) {
-        return longClassName.substring(longClassName.lastIndexOf(".") + 1);
+        return Objects.requireNonNull(longClassName).substring(longClassName.lastIndexOf(".") + 1);
     }
 
     public static String calcPackageName(String longClassName) {
-        return longClassName.substring(0, longClassName.lastIndexOf("."));
+        return Objects.requireNonNull(longClassName).substring(0, longClassName.lastIndexOf("."));
     }
 
     public static String calcInternalName(String name) {
-        return name.replace('/', '.');
+        return Objects.requireNonNull(name)
+                      .replace('/', '.')
+                      .replace('$', '.');
     }
 
     //TODO

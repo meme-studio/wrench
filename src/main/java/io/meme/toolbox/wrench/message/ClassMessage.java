@@ -6,6 +6,7 @@ import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,8 +19,11 @@ import java.util.List;
  * @since 2018/7/23
  */
 @RequiredArgsConstructor(staticName = "of")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class ClassMessage extends ClassResolver implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
+
+    @EqualsAndHashCode.Include
     @Getter
     private String name;
     private int access;

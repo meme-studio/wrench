@@ -6,8 +6,10 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.*;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -33,6 +35,10 @@ public final class $ {
         private String suffixName;
     }
 
+    public static final int INVISIBLE = 0;
+
+    public static final String CLASSPATH = System.getProperty("java.class.path");
+
     public static final int IGNORE_CLASS_VISIBILITY = 1;
 
     public static final int IGNORE_FIELD_VISIBILITY = 2;
@@ -55,6 +61,10 @@ public final class $ {
         return path.substring(path.lastIndexOf("."));
     }
 
+    public static boolean isAnonymousClass(String path) {
+        return path.matches("^.*[$]\\d+\\.class$");
+    }
+
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
                 API.Case(API.$(is(JAR.getSuffixName())), JAR),
@@ -73,16 +83,25 @@ public final class $ {
 
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, String superName, List<String> interfaces, InputStream is) {
-        ClassReader reader = new ClassReader(is);
-        return (isIgnoreClassVisibility(ignoreVisibilities)
-                || AccessUtils.isPublic(reader.getAccess()))
-                && isExtend(superName, interfaces, reader)
-                ? getClassMessage(reader, ignoreVisibilities) : null;
+        return Try(() -> new ClassReader(is)).toOption()
+                                             .toJavaOptional()
+                                             .filter(reader -> (isIgnoreClassVisibility(ignoreVisibilities)
+                                                             || AccessUtils.isPublic(reader.getAccess()))
+                                                             && isExtend(superName, interfaces, reader))
+                                             .map(reader -> getClassMessage(reader, ignoreVisibilities))
+                                             .orElse(null);
     }
 
-    private static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
+    public static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
         return Stream.concat(Stream.of(superName), interfaces.stream())
-                     .allMatch(isIn(reader.getInterfaces()).or(is(reader.getSuperName())));
+                     .allMatch(isIn(Arrays.stream(reader.getInterfaces())
+                                          .map(NameUtils::calcInternalName)
+                                          .toArray())
+                             .or(is(NameUtils.calcInternalName(getSuperName(reader)))));
+    }
+
+    private static String getSuperName(ClassReader reader) {
+        return Objects.isNull(reader.getSuperName()) ? "java/lang/Object" : reader.getSuperName();
     }
 
     private static ClassMessage getClassMessage(ClassReader reader, int ignoreVisibilities) {

@@ -32,7 +32,8 @@ import static java.util.stream.Collectors.*;
 @Builder
 public final class Wrench {
 
-    private int ignoreVisibilities;
+    @Builder.Default
+    private int ignoreVisibilities = $.INVISIBLE;
 
     @Builder.Default
     private String superClass = "java.lang.Object";
@@ -46,26 +47,12 @@ public final class Wrench {
     @Builder.Default
     private List<String> excludePackages = emptyList();
 
-    @Builder.Default
-    private String javaHome = System.getProperty("java.home");
-
-    @Builder.Default
-    private String classpath = Objects.requireNonNull(Thread.currentThread()
-                                                            .getContextClassLoader()
-                                                            .getResource("/"))
-                                      .getPath();
-
-
-    public static Wrench allPackages() {
+    public static Wrench wrench() {
         return Wrench.builder().build();
     }
 
-    public static Wrench disableJavaHome() {
-        return Wrench.builder().javaHome(null).build();
-    }
-
-    public static Wrench disableClassPath() {
-        return Wrench.builder().classpath(null).build();
+    public static Result directlyScan() {
+        return wrench().scan();
     }
 
     public Wrench superClass(Class<?> superClass) {
@@ -119,9 +106,9 @@ public final class Wrench {
     }
 
     public Result scan() {
-        return Stream.of(classpath, javaHome)
-                     .filter(Objects::nonNull)
+        return Stream.of($.CLASSPATH.split(";"))
                      .flatMap(this::scan)
+                     .filter(Objects::nonNull)
                      .distinct()
                      .collect(collectingAndThen(toMap(ClassMessage::getName, identity()), Result::of));
     }
@@ -135,6 +122,7 @@ public final class Wrench {
                     .collect(collectingAndThen(groupingBy($::determineClassFileType), this::scan));
     }
 
+
     private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> pathGroup) {
         return Stream.concat(
                 scanJarType(pathGroup.getOrDefault($.ClassFileType.JAR, emptyList())),
@@ -144,6 +132,7 @@ public final class Wrench {
 
     private Stream<ClassMessage> scanClassType(List<String> paths) {
         return paths.stream()
+                    .filter(Predicates.negate($::isAnonymousClass))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
                     .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces));
@@ -163,10 +152,10 @@ public final class Wrench {
 
     private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
         return entry.getValue()
-                    .filter(jarEntry -> $.isClassFileType(jarEntry.getName()))
+                    .filter(Predicates.of(Function($::isClassFileType).compose(JarEntry::getName)))
+                    .filter(Predicates.of(Function($::isAnonymousClass).compose(JarEntry::getName)).negate())
                     .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces))
-                    .filter(Objects::nonNull);
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces));
     }
 
 }

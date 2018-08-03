@@ -13,5 +13,5 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor(staticName = "of")
 public class Result {
-    private Map<String, ClassMessage> classMessages;
+    private final Map<String, ClassMessage> classMessages;
 }
