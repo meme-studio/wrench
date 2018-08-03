@@ -1,9 +1,12 @@
 package io.meme.toolbox.wrench.message;
 
+import io.meme.toolbox.wrench.message.resolver.FieldResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * @author meme
@@ -11,7 +14,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor(staticName = "of")
-public class FieldMessage extends FieldResolver {
+public class FieldMessage extends FieldResolver implements Serializable {
     private static final long serialVersionUID = 2648987017868206269L;
     private String name;
     private String longTypeName;

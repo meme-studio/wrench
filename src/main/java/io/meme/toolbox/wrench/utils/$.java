@@ -6,6 +6,7 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.*;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -16,6 +17,7 @@ import static io.meme.toolbox.wrench.utils.$.ClassFileType.JAR;
 import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
+import static io.vavr.Predicates.isIn;
 
 /**
  * @author meme
@@ -57,7 +59,9 @@ public final class $ {
         return Match(getSuffixName(path)).of(
                 API.Case(API.$(is(JAR.getSuffixName())), JAR),
                 API.Case(API.$(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> {throw new IllegalArgumentException("Illegal class file type!");})
+                Case($(), () -> {
+                    throw new IllegalArgumentException("Illegal class file type!");
+                })
         );
     }
 
@@ -68,14 +72,23 @@ public final class $ {
     }
 
     @SneakyThrows
-    public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
+    public static ClassMessage determineClassMessage(int ignoreVisibilities, String superName, List<String> interfaces, InputStream is) {
         ClassReader reader = new ClassReader(is);
-        if (isIgnoreClassVisibility(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess())) {
-            ClassMessage classMessage = new ClassMessage();
-            reader.accept(classMessage, 0);
-            return classMessage;
-        }
-        return null;
+        return (isIgnoreClassVisibility(ignoreVisibilities)
+                || AccessUtils.isPublic(reader.getAccess()))
+                && isExtend(superName, interfaces, reader)
+                ? getClassMessage(reader) : null;
+    }
+
+    private static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
+        return Stream.concat(Stream.of(superName), interfaces.stream())
+                     .allMatch(isIn(reader.getInterfaces()).or(is(reader.getSuperName())));
+    }
+
+    private static ClassMessage getClassMessage(ClassReader reader) {
+        ClassMessage classMessage = new ClassMessage();
+        reader.accept(classMessage, 0);
+        return classMessage;
     }
 
     private static boolean isIgnoreClassVisibility(int ignoreVisibilities) {

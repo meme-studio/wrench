@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.message;
 
+import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import jdk.internal.org.objectweb.asm.Label;
 import lombok.AllArgsConstructor;

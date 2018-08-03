@@ -1,10 +1,12 @@
 package io.meme.toolbox.wrench.message;
 
+import io.meme.toolbox.wrench.message.resolver.ClassResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import jdk.internal.org.objectweb.asm.*;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
  * @since 2018/7/23
  */
 @Getter
-public class ClassMessage extends ClassResolver {
+public class ClassMessage extends ClassResolver implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
     private String name;
     private int access;

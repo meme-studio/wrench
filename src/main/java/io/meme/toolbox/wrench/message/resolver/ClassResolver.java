@@ -1,4 +1,4 @@
-package io.meme.toolbox.wrench.message;
+package io.meme.toolbox.wrench.message.resolver;
 
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
@@ -7,8 +7,8 @@ import jdk.internal.org.objectweb.asm.Opcodes;
  * @author meme
  * @since 2018/7/30
  */
-abstract class ClassResolver extends ClassVisitor {
-    ClassResolver() {
+public abstract class ClassResolver extends ClassVisitor {
+    protected ClassResolver() {
         super(Opcodes.ASM5);
     }
 }

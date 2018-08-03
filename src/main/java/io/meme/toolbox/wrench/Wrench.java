@@ -2,6 +2,7 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
+import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.API;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -12,10 +13,7 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -34,8 +32,13 @@ import static java.util.stream.Collectors.*;
 @Builder
 public final class Wrench {
 
-    @Builder.Default
     private int ignoreVisibilities;
+
+    @Builder.Default
+    private String superClass = "java.lang.Object";
+
+    @Builder.Default
+    private List<String> interfaces = emptyList();
 
     @Builder.Default
     private List<String> includePackages = emptyList();
@@ -52,32 +55,48 @@ public final class Wrench {
                                                             .getResource("/"))
                                       .getPath();
 
+
     public static Wrench allPackages() {
         return Wrench.builder().build();
     }
 
-    public static Wrench includePackages(String... packageNames) {
-        return Wrench.builder()
-                     .includePackages(Arrays.asList(packageNames))
-                     .build();
+    public static Wrench disableJavaHome() {
+        return Wrench.builder().javaHome(null).build();
     }
 
-    public static Wrench excludePackages(String... packageNames) {
-        return Wrench.builder()
-                     .excludePackages(Arrays.asList(packageNames))
-                     .build();
+    public static Wrench disableClassPath() {
+        return Wrench.builder().classpath(null).build();
     }
 
-    public static Wrench disableJavaHomeScanning() {
-        return Wrench.builder()
-                     .javaHome(null)
-                     .build();
+    public Wrench superClass(Class<?> superClass) {
+        Optional.of(Objects.requireNonNull(superClass))
+                .filter(Class::isInterface)
+                .ifPresent(clazz -> {
+                    throw new IllegalArgumentException("Class " + clazz.getName() + " is an interface!");
+                });
+        this.superClass = superClass.getName();
+        return this;
     }
 
-    public static Wrench disableClassPathScanning() {
-        return Wrench.builder()
-                     .classpath(null)
-                     .build();
+    public Wrench interfaces(Class<?>... interfaces) {
+        Arrays.stream(interfaces)
+              .filter((Predicates.negate(Class::isInterface)))
+              .findAny()
+              .ifPresent(clazz -> {
+                  throw new IllegalArgumentException("Class " + clazz.getName() + " is not an interface!");
+              });
+        this.interfaces = Arrays.stream(interfaces).map(Class::getName).collect(toList());
+        return this;
+    }
+
+    public Wrench includePackages(String... packageNames) {
+        includePackages = Arrays.asList(packageNames);
+        return this;
+    }
+
+    public Wrench excludePackages(String... packageNames) {
+        excludePackages = Arrays.asList(packageNames);
+        return this;
     }
 
     public Wrench ignoreMethodVisibility() {
@@ -127,7 +146,7 @@ public final class Wrench {
         return paths.stream()
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -146,7 +165,7 @@ public final class Wrench {
         return entry.getValue()
                     .filter(jarEntry -> $.isClassFileType(jarEntry.getName()))
                     .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities))
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces))
                     .filter(Objects::nonNull);
     }
 
