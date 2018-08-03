@@ -1,7 +1,7 @@
-package io.meme.joke.classscanner;
+package io.meme.toolbox.wrench;
 
-import io.meme.joke.classscanner.message.ClassMessage;
-import io.meme.joke.classscanner.utils.$;
+import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.utils.$;
 import io.vavr.API;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -20,8 +20,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import static io.meme.joke.classscanner.utils.$.ClassFileType.CLASS;
-import static io.meme.joke.classscanner.utils.$.ClassFileType.JAR;
 import static io.vavr.API.Function;
 import static io.vavr.API.unchecked;
 import static java.util.Collections.emptyList;
@@ -34,7 +32,7 @@ import static java.util.stream.Collectors.*;
  */
 @Log
 @Builder
-public class ClassScanner {
+public final class Wrench {
 
     @Builder.Default
     private int ignoreVisibilities;
@@ -54,50 +52,50 @@ public class ClassScanner {
                                                             .getResource("/"))
                                       .getPath();
 
-    public static ClassScanner allPackages() {
-        return ClassScanner.builder().build();
+    public static Wrench allPackages() {
+        return Wrench.builder().build();
     }
 
-    public static ClassScanner includePackages(String... packageNames) {
-        return ClassScanner.builder()
-                           .includePackages(Arrays.asList(packageNames))
-                           .build();
+    public static Wrench includePackages(String... packageNames) {
+        return Wrench.builder()
+                     .includePackages(Arrays.asList(packageNames))
+                     .build();
     }
 
-    public static ClassScanner excludePackages(String... packageNames) {
-        return ClassScanner.builder()
-                           .excludePackages(Arrays.asList(packageNames))
-                           .build();
+    public static Wrench excludePackages(String... packageNames) {
+        return Wrench.builder()
+                     .excludePackages(Arrays.asList(packageNames))
+                     .build();
     }
 
-    public static ClassScanner disableJavaHomeScanning() {
-        return ClassScanner.builder()
-                           .javaHome(null)
-                           .build();
+    public static Wrench disableJavaHomeScanning() {
+        return Wrench.builder()
+                     .javaHome(null)
+                     .build();
     }
 
-    public static ClassScanner disableClassPathScanning() {
-        return ClassScanner.builder()
-                           .classpath(null)
-                           .build();
+    public static Wrench disableClassPathScanning() {
+        return Wrench.builder()
+                     .classpath(null)
+                     .build();
     }
 
-    public ClassScanner ignoreMethodVisibility() {
+    public Wrench ignoreMethodVisibility() {
         ignoreVisibilities |= $.IGNORE_METHOD_VISIBILITY;
         return this;
     }
 
-    public ClassScanner ignoreClassVisibility() {
+    public Wrench ignoreClassVisibility() {
         ignoreVisibilities |= $.IGNORE_CLASS_VISIBILITY;
         return this;
     }
 
-    public ClassScanner ignoreFieldVisibility() {
+    public Wrench ignoreFieldVisibility() {
         ignoreVisibilities |= $.IGNORE_FIELD_VISIBILITY;
         return this;
     }
 
-    public ClassScanner ignoreVisibility() {
+    public Wrench ignoreVisibility() {
         return ignoreFieldVisibility().ignoreClassVisibility().ignoreMethodVisibility();
     }
 
@@ -120,8 +118,8 @@ public class ClassScanner {
 
     private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> pathGroup) {
         return Stream.concat(
-                scanJarType(pathGroup.getOrDefault(JAR, emptyList())),
-                scanClassType(pathGroup.getOrDefault(CLASS, emptyList()))
+                scanJarType(pathGroup.getOrDefault($.ClassFileType.JAR, emptyList())),
+                scanClassType(pathGroup.getOrDefault($.ClassFileType.CLASS, emptyList()))
         );
     }
 

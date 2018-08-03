@@ -1,6 +1,6 @@
-package io.meme.joke.classscanner;
+package io.meme.toolbox.wrench;
 
-import io.meme.joke.classscanner.message.ClassMessage;
+import io.meme.toolbox.wrench.message.ClassMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

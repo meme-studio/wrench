@@ -1,7 +1,7 @@
-package io.meme.joke.classscanner.message;
+package io.meme.toolbox.wrench.message;
 
-import io.meme.joke.classscanner.utils.AccessUtils;
-import io.meme.joke.classscanner.utils.NameUtils;
+import io.meme.toolbox.wrench.utils.AccessUtils;
+import io.meme.toolbox.wrench.utils.NameUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

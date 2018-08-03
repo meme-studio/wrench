@@ -1,6 +1,7 @@
-package io.meme.joke.classscanner.utils;
+package io.meme.toolbox.wrench.utils;
 
-import io.meme.joke.classscanner.message.ClassMessage;
+import io.meme.toolbox.wrench.message.ClassMessage;
+import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.*;
 
@@ -10,8 +11,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import static io.meme.joke.classscanner.utils.$.ClassFileType.CLASS;
-import static io.meme.joke.classscanner.utils.$.ClassFileType.JAR;
+import static io.meme.toolbox.wrench.utils.$.ClassFileType.CLASS;
+import static io.meme.toolbox.wrench.utils.$.ClassFileType.JAR;
 import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
@@ -54,8 +55,8 @@ public final class $ {
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
-                Case($(is(JAR.getSuffixName())), JAR),
-                Case($(is(CLASS.getSuffixName())), CLASS),
+                API.Case(API.$(is(JAR.getSuffixName())), JAR),
+                API.Case(API.$(is(CLASS.getSuffixName())), CLASS),
                 Case($(), () -> {throw new IllegalArgumentException("Illegal class file type!");})
         );
     }

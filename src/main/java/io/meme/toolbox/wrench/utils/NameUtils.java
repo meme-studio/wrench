@@ -1,4 +1,4 @@
-package io.meme.joke.classscanner.utils;
+package io.meme.toolbox.wrench.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

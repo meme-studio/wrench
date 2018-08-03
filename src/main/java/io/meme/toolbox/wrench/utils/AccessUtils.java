@@ -1,4 +1,4 @@
-package io.meme.joke.classscanner.utils;
+package io.meme.toolbox.wrench.utils;
 
 import jdk.internal.org.objectweb.asm.Opcodes;
 import lombok.AccessLevel;

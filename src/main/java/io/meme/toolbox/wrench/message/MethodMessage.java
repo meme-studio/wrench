@@ -1,6 +1,6 @@
-package io.meme.joke.classscanner.message;
+package io.meme.toolbox.wrench.message;
 
-import io.meme.joke.classscanner.utils.AccessUtils;
+import io.meme.toolbox.wrench.utils.AccessUtils;
 import jdk.internal.org.objectweb.asm.Label;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

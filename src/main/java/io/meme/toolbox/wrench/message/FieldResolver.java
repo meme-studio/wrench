@@ -1,4 +1,4 @@
-package io.meme.joke.classscanner.message;
+package io.meme.toolbox.wrench.message;
 
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
