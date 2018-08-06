@@ -2,6 +2,7 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
+import io.meme.toolbox.wrench.utils.Asserts;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.API;
 import lombok.Builder;
@@ -51,16 +52,14 @@ public final class Wrench {
         return Wrench.builder().build();
     }
 
-    public static Result directlyScan() {
+    public static Result scanDirectly() {
         return wrench().scan();
     }
 
     public Wrench superClass(Class<?> superClass) {
         Optional.of(Objects.requireNonNull(superClass))
                 .filter(Class::isInterface)
-                .ifPresent(clazz -> {
-                    throw new IllegalArgumentException("Class " + clazz.getName() + " is an interface!");
-                });
+                .ifPresent(clazz -> Asserts.illegal(clazz.getName()));
         this.superClass = superClass.getName();
         return this;
     }
@@ -69,9 +68,7 @@ public final class Wrench {
         Arrays.stream(interfaces)
               .filter((Predicates.negate(Class::isInterface)))
               .findAny()
-              .ifPresent(clazz -> {
-                  throw new IllegalArgumentException("Class " + clazz.getName() + " is not an interface!");
-              });
+              .ifPresent(clazz -> Asserts.illegal(clazz.getName()));
         this.interfaces = Arrays.stream(interfaces).map(Class::getName).collect(toList());
         return this;
     }
@@ -135,7 +132,7 @@ public final class Wrench {
                     .filter(Predicates.negate($::isAnonymousClass))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces));
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -155,7 +152,7 @@ public final class Wrench {
                     .filter(Predicates.of(Function($::isClassFileType).compose(JarEntry::getName)))
                     .filter(Predicates.of(Function($::isAnonymousClass).compose(JarEntry::getName)).negate())
                     .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities, superClass, interfaces));
+                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
     }
 
 }

@@ -4,6 +4,9 @@ import io.meme.toolbox.wrench.message.resolver.ClassResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
+import io.vavr.Function3;
+import io.vavr.Predicates;
+import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import lombok.EqualsAndHashCode;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,19 +33,15 @@ public class ClassMessage extends ClassResolver implements Serializable {
     private int access;
     private String signature;
     @Getter
+    private String superClassName;
+    @Getter
+    private List<String> interfaceNames;
+    @Getter
     private List<MethodMessage> methodMessages = new ArrayList<>();
     @Getter
     private List<FieldMessage> fieldMessages = new ArrayList<>();
 
     private final int ignoreVisibilities;
-
-    public List<String> getInterfaceNames() {
-        return NameUtils.calcInterfaceNames(signature);
-    }
-
-    public String getSuperClassName() {
-        return NameUtils.calcSuperClassName(signature);
-    }
 
     public String getSimpleName() {
         return NameUtils.calcSimpleClassName(name);
@@ -72,16 +72,16 @@ public class ClassMessage extends ClassResolver implements Serializable {
         this.name = NameUtils.calcInternalName(name);
         this.signature = signature;
         this.access = access;
+        this.superClassName = superName;
+        this.interfaceNames = Arrays.asList(interfaces);
     }
 
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        return $.isIgnoreFieldVisibility(ignoreVisibilities)
-                || AccessUtils.isPublic(access)
-                ? calcFieldMessage(access, name, desc) : null;
+        return visitAndReturn(access, name, desc, this::calcFieldMessage);
     }
 
-    private FieldMessage calcFieldMessage(int access, String name, String desc) {
+    private FieldMessage calcFieldMessage(String name, String desc, int access) {
         FieldMessage field = FieldMessage.of(name, desc, access);
         fieldMessages.add(field);
         return field;
@@ -89,12 +89,17 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return $.isIgnoreMethodVisibility(ignoreVisibilities)
-                || AccessUtils.isPublic(access)
-                ? calcMethodMessage(access, name, desc) : null;
+        return visitAndReturn(access, name, desc, this::calcMethodMessage);
     }
 
-    private MethodMessage calcMethodMessage(int access, String name, String desc) {
+    private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator) {
+        return Option.of(access)
+                     .filter(Predicates.anyOf(ignore -> $.isIgnoreFieldVisibility(ignoreVisibilities), AccessUtils::isPublic))
+                     .map(messageGenerator.apply(name, desc))
+                     .getOrNull();
+    }
+
+    private MethodMessage calcMethodMessage(String name, String desc, int access) {
         MethodMessage method = MethodMessage.of(name, desc, access);
         methodMessages.add(method);
         return method;

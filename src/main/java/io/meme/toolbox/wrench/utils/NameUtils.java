@@ -3,6 +3,7 @@ package io.meme.toolbox.wrench.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,13 +28,14 @@ public final class NameUtils {
                       .replace('$', '.');
     }
 
-    //TODO
-    public static List<String> calcInterfaceNames(String signature) {
-        return null;
+    public static String[] calcInternalNames(List<String> names) {
+        return calcInternalNames(names.toArray(new String[0]));
     }
 
-    //TODO
-    public static String calcSuperClassName(String signature) {
-        return null;
+    public static String[] calcInternalNames(String... names) {
+        return Arrays.stream(names)
+                     .map(NameUtils::calcInternalName)
+                     .toArray(String[]::new);
     }
+
 }

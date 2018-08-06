@@ -1,12 +1,10 @@
 package io.meme.toolbox.wrench.utils;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
-import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.*;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +14,6 @@ import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.CLASS;
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.JAR;
-import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
 import static io.vavr.Predicates.isIn;
@@ -35,9 +32,10 @@ public final class $ {
         private String suffixName;
     }
 
-    public static final int INVISIBLE = 0;
 
-    public static final String CLASSPATH = System.getProperty("java.class.path");
+    public static final String CLASSPATH = Objects.requireNonNull(System.getProperty("java.class.path"));
+
+    public static final int INVISIBLE = 0;
 
     public static final int IGNORE_CLASS_VISIBILITY = 1;
 
@@ -67,44 +65,40 @@ public final class $ {
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
-                API.Case(API.$(is(JAR.getSuffixName())), JAR),
-                API.Case(API.$(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> {
-                    throw new IllegalArgumentException("Illegal class file type!");
-                })
+                Case($(is(JAR.getSuffixName())), JAR),
+                Case($(is(CLASS.getSuffixName())), CLASS),
+                Case($(), () -> Asserts.illegal("class file type"))
         );
     }
 
     @SneakyThrows
     public static InputStream getClassInputStream(Map.Entry<JarFile, Stream<JarEntry>> entry, JarEntry jarEntry) {
-        return entry.getKey()
-                    .getInputStream(jarEntry);
+        return entry.getKey().getInputStream(jarEntry);
     }
 
     @SneakyThrows
-    public static ClassMessage determineClassMessage(int ignoreVisibilities, String superName, List<String> interfaces, InputStream is) {
+    public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
-                                             .toJavaOptional()
-                                             .filter(reader -> (isIgnoreClassVisibility(ignoreVisibilities)
-                                                             || AccessUtils.isPublic(reader.getAccess()))
-                                                             && isExtend(superName, interfaces, reader))
-                                             .map(reader -> getClassMessage(reader, ignoreVisibilities))
-                                             .orElse(null);
+                                              .filter(Predicates.of(Function($::matchLimited).apply(ignoreVisibilities)))
+                                              .map(Function($::getClassMessage).apply(ignoreVisibilities))
+                                              .getOrNull();
     }
 
-    public static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
+    private static boolean matchLimited(int ignoreVisibilities, ClassReader reader) {
+        return isIgnoreClassVisibility(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
+    }
+
+    //TODO
+    private static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
         return Stream.concat(Stream.of(superName), interfaces.stream())
-                     .allMatch(isIn(Arrays.stream(reader.getInterfaces())
-                                          .map(NameUtils::calcInternalName)
-                                          .toArray())
-                             .or(is(NameUtils.calcInternalName(getSuperName(reader)))));
+                     .allMatch(isIn(NameUtils.calcInternalNames(interfaces)).or(is(NameUtils.calcInternalName(getSuperName(reader)))));
     }
 
     private static String getSuperName(ClassReader reader) {
         return Objects.isNull(reader.getSuperName()) ? "java/lang/Object" : reader.getSuperName();
     }
 
-    private static ClassMessage getClassMessage(ClassReader reader, int ignoreVisibilities) {
+    private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
         ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
         reader.accept(classMessage, 0);
         return classMessage;

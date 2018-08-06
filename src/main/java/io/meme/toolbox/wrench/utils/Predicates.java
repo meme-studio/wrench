@@ -19,8 +19,7 @@ public class Predicates {
     }
 
     public static <T> Predicate<T> of(Function<T, Boolean> function) {
-        Objects.requireNonNull(function);
-        return function::apply;
+        return Objects.requireNonNull(function)::apply;
     }
 
 }
