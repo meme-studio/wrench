@@ -32,6 +32,7 @@ public final class $ {
         private String suffixName;
     }
 
+    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
 
     public static final String CLASSPATH = Objects.requireNonNull(System.getProperty("java.class.path"));
 

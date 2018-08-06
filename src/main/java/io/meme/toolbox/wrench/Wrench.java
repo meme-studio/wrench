@@ -37,7 +37,7 @@ public final class Wrench {
     private int ignoreVisibilities = $.INVISIBLE;
 
     @Builder.Default
-    private String superClass = "java.lang.Object";
+    private String superClass = $.JAVA_LANG_OBJECT;
 
     @Builder.Default
     private List<String> interfaces = emptyList();
@@ -103,7 +103,7 @@ public final class Wrench {
     }
 
     public Result scan() {
-        return Stream.of($.CLASSPATH.split(";"))
+        return Stream.of($.CLASSPATH.split(File.pathSeparator))
                      .flatMap(this::scan)
                      .filter(Objects::nonNull)
                      .distinct()
@@ -152,11 +152,9 @@ public final class Wrench {
     private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
         return entry.getValue()
                     .filter(Predicates.of(Function($::isClassFileType).compose(JarEntry::getName)))
-                    .filter(Predicates.of(Function($::matchPackages).apply(includePackages)
-                                                                    .compose(JarEntry::getName)))
-                    .filter(Predicates.negate(Function($::matchPackages).apply(excludePackages)
-                                                                        .compose(JarEntry::getName)))
-                    .filter(Predicates.of(Function($::isAnonymousClass).compose(JarEntry::getName)).negate())
+                    .filter(Predicates.negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
+                    .filter(Predicates.of(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
+                    .filter(Predicates.negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
                     .map(Function($::getClassInputStream).apply(entry))
                     .map(Function($::determineClassMessage).apply(ignoreVisibilities));
     }
