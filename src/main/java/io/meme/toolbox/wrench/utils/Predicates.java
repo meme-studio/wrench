@@ -14,12 +14,12 @@ public class Predicates {
         return Objects.requireNonNull(predicate);
     }
 
-    public static <T> Predicate<T> negate(Predicate<T> predicate) {
-        return Objects.requireNonNull(predicate).negate();
-    }
-
     public static <T> Predicate<T> of(Function<T, Boolean> function) {
         return Objects.requireNonNull(function)::apply;
+    }
+
+    public static <T> Predicate<T> negate(Function<T, Boolean> function) {
+        return of(function).negate();
     }
 
 }

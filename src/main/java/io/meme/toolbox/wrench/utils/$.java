@@ -104,6 +104,10 @@ public final class $ {
         return classMessage;
     }
 
+    public static boolean matchPackages(List<String> packages, String path) {
+        return packages.stream().anyMatch(NameUtils.calcInternalName(path)::contains);
+    }
+
     public static boolean isIgnoreClassVisibility(int ignoreVisibilities) {
         return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;
     }
