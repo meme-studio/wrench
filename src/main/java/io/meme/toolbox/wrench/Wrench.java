@@ -2,19 +2,20 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
-import io.meme.toolbox.wrench.utils.Asserts;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.API;
 import lombok.Builder;
 import lombok.SneakyThrows;
-import lombok.extern.java.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -29,18 +30,11 @@ import static java.util.stream.Collectors.*;
  * @author meme
  * @since 2018/7/23
  */
-@Log
 @Builder
 public final class Wrench {
 
     @Builder.Default
     private int ignoreVisibilities = $.INVISIBLE;
-
-    @Builder.Default
-    private String superClass = $.JAVA_LANG_OBJECT;
-
-    @Builder.Default
-    private List<String> interfaces = emptyList();
 
     @Builder.Default
     private List<String> includePackages = emptyList();
@@ -54,23 +48,6 @@ public final class Wrench {
 
     public static Result scanDirectly() {
         return wrench().scan();
-    }
-
-    public Wrench superClass(Class<?> superClass) {
-        Optional.of(Objects.requireNonNull(superClass))
-                .filter(Class::isInterface)
-                .ifPresent(clazz -> Asserts.illegal(clazz.getName()));
-        this.superClass = superClass.getName();
-        return this;
-    }
-
-    public Wrench interfaces(Class<?>... interfaces) {
-        Arrays.stream(interfaces)
-              .filter((Predicates.negate(Class::isInterface)))
-              .findAny()
-              .ifPresent(clazz -> Asserts.illegal(clazz.getName()));
-        this.interfaces = Arrays.stream(interfaces).map(Class::getName).collect(toList());
-        return this;
     }
 
     public Wrench includePackages(String... packageNames) {

@@ -12,8 +12,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import static io.meme.toolbox.wrench.utils.$.ClassFileType.CLASS;
-import static io.meme.toolbox.wrench.utils.$.ClassFileType.JAR;
+import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
+import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
 import static io.vavr.Predicates.isIn;
@@ -28,11 +28,9 @@ public final class $ {
     @AllArgsConstructor
     @Getter
     public enum ClassFileType {
-        JAR(".jar"), CLASS(".class");
+        JAR(".jar"), WAR(".war"), CLASS(".class");
         private String suffixName;
     }
-
-    public static final String JAVA_LANG_OBJECT = "java.lang.Object";
 
     public static final String CLASSPATH = Objects.requireNonNull(System.getProperty("java.class.path"));
 
@@ -66,10 +64,9 @@ public final class $ {
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
-                Case($(is(JAR.getSuffixName())), JAR),
+                Case($(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
                 Case($(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> Asserts.illegal("class file type"))
-        );
+                Case($(), () -> Asserts.fail("class file type")));
     }
 
     @SneakyThrows
@@ -80,13 +77,19 @@ public final class $ {
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
-                                              .filter(Predicates.of(Function($::matchLimited).apply(ignoreVisibilities)))
-                                              .map(Function($::getClassMessage).apply(ignoreVisibilities))
-                                              .getOrNull();
+                                             .filter(Predicates.of(Function($::matchLimited).apply(ignoreVisibilities)))
+                                             .map(Function($::getClassMessage).apply(ignoreVisibilities))
+                                             .getOrNull();
     }
 
     private static boolean matchLimited(int ignoreVisibilities, ClassReader reader) {
         return isIgnoreClassVisibility(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
+    }
+
+    private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
+        ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
+        reader.accept(classMessage, 0);
+        return classMessage;
     }
 
     //TODO
@@ -97,12 +100,6 @@ public final class $ {
 
     private static String getSuperName(ClassReader reader) {
         return Objects.isNull(reader.getSuperName()) ? "java/lang/Object" : reader.getSuperName();
-    }
-
-    private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
-        ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
-        reader.accept(classMessage, 0);
-        return classMessage;
     }
 
     public static boolean matchPackages(List<String> packages, String path) {

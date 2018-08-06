@@ -17,6 +17,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author meme
@@ -42,6 +45,12 @@ public class ClassMessage extends ClassResolver implements Serializable {
     private List<FieldMessage> fieldMessages = new ArrayList<>();
 
     private final int ignoreVisibilities;
+
+    public List<String> listSuperClassAndInterfaceNames() {
+        return Stream.concat(interfaceNames.stream(), Stream.of(superClassName))
+                     .filter(Objects::nonNull)
+                     .collect(Collectors.toList());
+    }
 
     public String getSimpleName() {
         return NameUtils.calcSimpleClassName(name);
