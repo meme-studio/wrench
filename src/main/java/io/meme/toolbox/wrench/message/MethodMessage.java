@@ -4,7 +4,6 @@ import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.Function2;
-import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.Label;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,9 +45,7 @@ public class MethodMessage extends MethodResolver implements Serializable {
                                                        .apply(index)
                                                        .compose(ArgumentMessage::getLvtSlotIndex)))
                         .findAny()
-                        .ifPresent(argumentMessage -> Option.of(name)
-                                                            .orElse(Option.of(String.format("arg%d", index)))
-                                                            .forEach(argumentMessage::setArgumentName));
+                        .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
     }
 
 }

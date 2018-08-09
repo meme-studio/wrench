@@ -10,11 +10,10 @@ import java.io.Serializable;
  * @since 2018/7/26
  */
 @Getter
-@RequiredArgsConstructor(staticName = "of")
+@AllArgsConstructor(staticName = "of")
 public class ArgumentMessage implements Serializable {
     private static final long serialVersionUID = -2807593115732931530L;
     private final String longTypeName;
-
     @Setter(AccessLevel.PACKAGE)
     private String argumentName;
     /**

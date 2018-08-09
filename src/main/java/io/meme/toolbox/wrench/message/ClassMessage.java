@@ -120,12 +120,14 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     private static List<ArgumentMessage> computeLvtSlotIndices(boolean isStatic, Type[] paramTypes) {
         return IntStream.range(0, paramTypes.length)
-                        .mapToObj(i -> calcArgumentMessage(isStatic ? 0 : 1, paramTypes, i))
+                        .boxed()
+                        .map(Function3.of(ClassMessage::calcArgumentMessage)
+                                      .apply(isStatic ? 0 : 1, paramTypes))
                         .collect(Collectors.toList());
     }
 
     private static ArgumentMessage calcArgumentMessage(int index, Type[] paramTypes, int i) {
-        return ArgumentMessage.of(paramTypes[i].getClassName(), calcIndex(index, paramTypes, i));
+        return ArgumentMessage.of(paramTypes[i].getClassName(), String.format("arg%d", i), calcIndex(index, paramTypes, i));
     }
 
     private static int calcIndex(int index, Type[] paramTypes, int i) {
