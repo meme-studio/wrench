@@ -1,5 +1,7 @@
 package io.meme.toolbox.wrench;
 
+import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.message.MethodMessage;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.tree.ClassNode;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,13 @@ class WrenchTest {
         ClassNode classVisitor = new ClassNode();
         classReader.accept(classVisitor, 0);
         Result scan = Wrench.wrench().includePackages("io.meme.toolbox.wrench").scan();
+        scan.getClassMessages()
+            .values()
+            .stream()
+            .map(ClassMessage::getMethodMessages)
+            .flatMap(List::stream)
+            .map(MethodMessage::getMethodDescription)
+            .forEach(System.out::println);
         System.in.read();
     }
 

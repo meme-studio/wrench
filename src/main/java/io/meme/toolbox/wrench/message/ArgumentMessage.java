@@ -11,10 +11,12 @@ import java.io.Serializable;
  */
 @Getter
 @AllArgsConstructor(staticName = "of")
+@EqualsAndHashCode
 public class ArgumentMessage implements Serializable {
     private static final long serialVersionUID = -2807593115732931530L;
     private final String longTypeName;
     @Setter(AccessLevel.PACKAGE)
+    @EqualsAndHashCode.Include
     private String argumentName;
     /**
      * Reference to Spring

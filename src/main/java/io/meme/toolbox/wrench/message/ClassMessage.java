@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -131,10 +130,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
     }
 
     private static int calcIndex(int index, Type[] paramTypes, int i) {
-        return Option.of(i)
-                     .filter(Predicate.isEqual(0))
-                     .map(ignore -> index)
-                     .getOrElse(() -> calcPreIndex(index, paramTypes, i - 1));
+        return Objects.equals(i, 0) ? index : calcPreIndex(index, paramTypes, i - 1);
     }
 
     private static int calcPreIndex(int index, Type[] paramTypes, int i) {

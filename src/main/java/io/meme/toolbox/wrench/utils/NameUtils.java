@@ -15,11 +15,13 @@ import java.util.Objects;
 public final class NameUtils {
 
     public static String calcSimpleClassName(String longClassName) {
-        return Objects.requireNonNull(longClassName).substring(longClassName.lastIndexOf(".") + 1);
+        return Objects.requireNonNull(longClassName)
+                      .substring(longClassName.lastIndexOf(".") + 1);
     }
 
     public static String calcPackageName(String longClassName) {
-        return Objects.requireNonNull(longClassName).substring(0, longClassName.lastIndexOf("."));
+        return Objects.requireNonNull(longClassName)
+                      .substring(0, longClassName.lastIndexOf("."));
     }
 
     public static String calcInternalName(String name) {

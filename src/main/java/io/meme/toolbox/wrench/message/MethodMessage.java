@@ -5,21 +5,26 @@ import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.Function2;
 import jdk.internal.org.objectweb.asm.Label;
+import jdk.internal.org.objectweb.asm.Type;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author meme
  * @since 2018/7/23
  */
 @AllArgsConstructor(staticName = "of")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class MethodMessage extends MethodResolver implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
     private final String name;
+    @EqualsAndHashCode.Include
     private final String desc;
     private final int access;
     @Getter
@@ -33,9 +38,14 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return AccessUtils.isStatic(access);
     }
 
-    //TODO
-    public String getDisplayDesc() {
-        return null;
+    public String getMethodDescription() {
+        return argumentMessages.stream()
+                               .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
+                               .collect(Collectors.joining(", ", String.format("%s %s(", getReturnType(), name), ")"));
+    }
+
+    public String getReturnType() {
+        return Type.getReturnType(desc).getClassName();
     }
 
     @Override
