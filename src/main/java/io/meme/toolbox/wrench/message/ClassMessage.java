@@ -9,6 +9,7 @@ import io.vavr.Predicates;
 import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
+import jdk.internal.org.objectweb.asm.Type;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -109,9 +112,32 @@ public class ClassMessage extends ClassResolver implements Serializable {
     }
 
     private MethodMessage calcMethodMessage(String name, String desc, int access) {
-        MethodMessage method = MethodMessage.of(name, desc, access);
+        List<ArgumentMessage> argumentMessages = computeLvtSlotIndices(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
+        MethodMessage method = MethodMessage.of(name, desc, access, argumentMessages);
         methodMessages.add(method);
         return method;
+    }
+
+    private static List<ArgumentMessage> computeLvtSlotIndices(boolean isStatic, Type[] paramTypes) {
+        return IntStream.range(0, paramTypes.length)
+                        .mapToObj(i -> calcArgumentMessage(isStatic ? 0 : 1, paramTypes, i))
+                        .collect(Collectors.toList());
+    }
+
+    private static ArgumentMessage calcArgumentMessage(int index, Type[] paramTypes, int i) {
+        return ArgumentMessage.of(paramTypes[i].getClassName(), calcIndex(index, paramTypes, i));
+    }
+
+    private static int calcIndex(int index, Type[] paramTypes, int i) {
+        return Option.of(i)
+                     .filter(Predicate.isEqual(0))
+                     .map(ignore -> index)
+                     .getOrElse(() -> calcPreIndex(index, paramTypes, i - 1));
+    }
+
+    private static int calcPreIndex(int index, Type[] paramTypes, int i) {
+        int preIndex = calcIndex(index, paramTypes, i);
+        return $.isWideType(paramTypes[i]) ? preIndex + 2 : preIndex + 1;
     }
 
 }

@@ -2,12 +2,16 @@ package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
+import io.meme.toolbox.wrench.utils.Predicates;
+import io.vavr.Function2;
+import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.Label;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author meme
@@ -19,6 +23,8 @@ public class MethodMessage extends MethodResolver implements Serializable {
     private final String name;
     private final String desc;
     private final int access;
+    @Getter
+    private final List<ArgumentMessage> argumentMessages;
 
     public boolean isAbstract() {
         return AccessUtils.isAbstract(access);
@@ -29,25 +35,20 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     //TODO
-    public List<ArgumentMessage> getArgumentMessages() {
-        return Collections.emptyList();
-    }
-
-    //TODO
-    @Override
-    public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        super.visitLocalVariable(name, desc, signature, start, end, index);
-    }
-
-    //TODO
-    @Override
-    public void visitParameter(String name, int access) {
-        super.visitParameter(name, access);
-    }
-
-    //TODO
     public String getDisplayDesc() {
         return null;
+    }
+
+    @Override
+    public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
+        argumentMessages.stream()
+                        .filter(Predicates.of(Function2.of(Objects::equals)
+                                                       .apply(index)
+                                                       .compose(ArgumentMessage::getLvtSlotIndex)))
+                        .findAny()
+                        .ifPresent(argumentMessage -> Option.of(name)
+                                                            .orElse(Option.of(String.format("arg%d", index)))
+                                                            .forEach(argumentMessage::setArgumentName));
     }
 
 }

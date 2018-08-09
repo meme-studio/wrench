@@ -2,6 +2,7 @@ package io.meme.toolbox.wrench.utils;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import jdk.internal.org.objectweb.asm.ClassReader;
+import jdk.internal.org.objectweb.asm.Type;
 import lombok.*;
 
 import java.io.InputStream;
@@ -90,6 +91,10 @@ public final class $ {
         ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
         reader.accept(classMessage, 0);
         return classMessage;
+    }
+
+    public static boolean isWideType(Type type) {
+        return Objects.equals(type, Type.LONG_TYPE) || Objects.equals(type, Type.DOUBLE_TYPE);
     }
 
     //TODO

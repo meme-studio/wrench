@@ -15,7 +15,7 @@ class WrenchTest {
         ClassReader classReader = new ClassReader("java.lang.Integer");
         ClassNode classVisitor = new ClassNode();
         classReader.accept(classVisitor, 0);
-        Result scan = Wrench.wrench().includePackages("io.vavr", "java.lang").scan();
+        Result scan = Wrench.wrench().includePackages("io.meme.toolbox.wrench").scan();
         System.in.read();
     }
 

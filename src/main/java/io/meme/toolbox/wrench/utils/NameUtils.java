@@ -25,6 +25,7 @@ public final class NameUtils {
     public static String calcInternalName(String name) {
         return Objects.requireNonNull(name)
                       .replace('/', '.')
+                      .replace('\\', '.')
                       .replace('$', '.');
     }
 
