@@ -53,7 +53,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     //FIXME for array type
     public static ClassMessage of(Class<?> clazz) {
-        return of(clazz.getName());
+        return of(clazz.getTypeName());
     }
 
     @SneakyThrows

@@ -12,7 +12,7 @@ class WrenchTest {
 
     @Test
     void scan() throws IOException {
-        ClassMessage message = ClassMessage.of(ArrayList.class);
+        ClassMessage message = ClassMessage.of(int.class);
         Result scan = Wrench.wrench().ignoreClassVisibility().ignoreMethodVisibility().includePackages("io.meme.toolbox.wrench").scan();
         scan.getClassMessages()
             .values()

@@ -52,9 +52,10 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     public String getMethodDescription() {
-        return argumentMessages.stream()
-                               .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
-                               .collect(joining(", ", String.format("%s(", getMethodPrefix()), ")"));
+        return isStatic() ? "static {}" :
+                argumentMessages.stream()
+                                .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
+                                .collect(joining(", ", String.format("%s(", getMethodPrefix()), ")"));
     }
 
     private String getMethodPrefix() {
