@@ -24,6 +24,7 @@ public final class NameUtils {
                       .substring(0, longClassName.lastIndexOf("."));
     }
 
+    //FIXME
     public static String calcInternalName(String name) {
         return Objects.requireNonNull(name)
                       .replace('/', '.')

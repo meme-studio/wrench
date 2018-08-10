@@ -28,6 +28,7 @@ public class Result {
         return classMessages.keySet();
     }
 
+    //TODO
     public Result byType(Class<?>... classes) {
         List<String> types = listClassNames(classes);
         List<ClassMessage> classMessages = byType(this.classMessages.values(), types);
