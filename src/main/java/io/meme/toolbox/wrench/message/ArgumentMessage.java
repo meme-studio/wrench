@@ -18,9 +18,6 @@ public class ArgumentMessage implements Serializable {
     @Setter(AccessLevel.PACKAGE)
     @EqualsAndHashCode.Include
     private String argumentName;
-    /**
-     * Reference to Spring
-     */
     @Getter(AccessLevel.PACKAGE)
     private final int lvtSlotIndex;
     public String getShortTypeName() {

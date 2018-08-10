@@ -17,7 +17,7 @@ class WrenchTest {
         ClassReader classReader = new ClassReader("java.lang.Integer");
         ClassNode classVisitor = new ClassNode();
         classReader.accept(classVisitor, 0);
-        Result scan = Wrench.wrench().includePackages("io.meme.toolbox.wrench").scan();
+        Result scan = Wrench.wrench().ignoreMethodVisibility().includePackages("io.meme.toolbox.wrench").scan();
         scan.getClassMessages()
             .values()
             .stream()
@@ -25,12 +25,24 @@ class WrenchTest {
             .flatMap(List::stream)
             .map(MethodMessage::getMethodDescription)
             .forEach(System.out::println);
-        System.in.read();
+        System.out.println();
     }
 
 }
 
 class A extends B implements Serializable, List<Date> {
+
+    static {
+        new ArrayList<>();
+    }
+
+    {
+        new ArrayList<>();
+    }
+
+    A(){
+
+    }
 
     @Override
     public int size() {

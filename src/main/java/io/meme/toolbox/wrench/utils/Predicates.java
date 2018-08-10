@@ -1,5 +1,8 @@
 package io.meme.toolbox.wrench.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -8,6 +11,7 @@ import java.util.function.Predicate;
  * @author meme
  * @since 2018/8/3
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Predicates {
 
     public static <T> Predicate<T> of(Predicate<T> predicate) {

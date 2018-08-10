@@ -111,13 +111,16 @@ public class ClassMessage extends ClassResolver implements Serializable {
     }
 
     private MethodMessage calcMethodMessage(String name, String desc, int access) {
-        List<ArgumentMessage> argumentMessages = computeLvtSlotIndices(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
-        MethodMessage method = MethodMessage.of(name, desc, access, argumentMessages);
+        List<ArgumentMessage> argumentMessages = calcArgumentMessages(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
+        MethodMessage method = MethodMessage.of(this.name, name, desc, access, argumentMessages);
         methodMessages.add(method);
         return method;
     }
 
-    private static List<ArgumentMessage> computeLvtSlotIndices(boolean isStatic, Type[] paramTypes) {
+    /**
+     * Reference to Spring {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer.LocalVariableTableVisitor#computeLvtSlotIndices(boolean, org.springframework.asm.Type[])}
+     */
+    private static List<ArgumentMessage> calcArgumentMessages(boolean isStatic, Type[] paramTypes) {
         return IntStream.range(0, paramTypes.length)
                         .boxed()
                         .map(Function3.of(ClassMessage::calcArgumentMessage)
