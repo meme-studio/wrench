@@ -4,8 +4,12 @@ import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.API;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,9 +41,13 @@ public final class Wrench {
     private int ignoreVisibilities = $.INVISIBLE;
 
     @Builder.Default
+    @Accessors(fluent = true)
+    @Setter(AccessLevel.PRIVATE)
     private List<String> includePackages = emptyList();
 
     @Builder.Default
+    @Accessors(fluent = true)
+    @Setter(AccessLevel.PRIVATE)
     private List<String> excludePackages = emptyList();
 
     public static Wrench wrench() {
@@ -48,16 +56,6 @@ public final class Wrench {
 
     public static Result scanDirectly() {
         return wrench().scan();
-    }
-
-    public Wrench includePackages(String... packageNames) {
-        includePackages = Arrays.asList(packageNames);
-        return this;
-    }
-
-    public Wrench excludePackages(String... packageNames) {
-        excludePackages = Arrays.asList(packageNames);
-        return this;
     }
 
     public Wrench ignoreMethodVisibility() {
@@ -75,12 +73,23 @@ public final class Wrench {
         return this;
     }
 
-    public Wrench ignoreVisibility() {
-        return ignoreFieldVisibility().ignoreClassVisibility().ignoreMethodVisibility();
+    public Wrench ignoreVisibilities() {
+        ignoreVisibilities = $.IGNORE_VISIBILITIES;
+        return this;
+    }
+
+    @Tolerate
+    public Wrench includePackages(String... packageNames) {
+        return includePackages(Arrays.asList(packageNames));
+    }
+
+    @Tolerate
+    public Wrench excludePackages(String... packageNames) {
+        return excludePackages(Arrays.asList(packageNames));
     }
 
     public Result scan() {
-        return Stream.of($.CLASSPATH.split(File.pathSeparator))
+        return Stream.of($.CLASSPATHS)
                      .flatMap(this::scan)
                      .filter(Objects::nonNull)
                      .distinct()

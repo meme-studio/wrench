@@ -47,6 +47,10 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return Objects.equals("<init>", name);
     }
 
+    public boolean isClinit() {
+        return Objects.equals("<clinit>", name);
+    }
+
     public String getMethodDescription() {
         return argumentMessages.stream()
                                .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
@@ -75,7 +79,7 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     public String getReturnType() {
-        return Type.getReturnType(desc).getClassName();
+        return NameUtils.calcInternalName(Type.getReturnType(desc).getClassName());
     }
 
     @Override

@@ -5,6 +5,7 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.Type;
 import lombok.*;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,8 @@ public final class $ {
         private String suffixName;
     }
 
-    public static final String CLASSPATH = Objects.requireNonNull(System.getProperty("java.class.path"));
+    public static final String[] CLASSPATHS = Objects.requireNonNull(System.getProperty("java.class.path"))
+                                                     .split(File.pathSeparator);
 
     public static final int INVISIBLE = 0;
 
@@ -42,6 +44,8 @@ public final class $ {
     public static final int IGNORE_FIELD_VISIBILITY = 2;
 
     public static final int IGNORE_METHOD_VISIBILITY = 4;
+
+    public static final int IGNORE_VISIBILITIES = IGNORE_CLASS_VISIBILITY | IGNORE_FIELD_VISIBILITY | IGNORE_METHOD_VISIBILITY;
 
     public static boolean isClassFileType(String path) {
         return isJarType(path) || isClassType(path);
@@ -60,14 +64,15 @@ public final class $ {
     }
 
     public static boolean isAnonymousClass(String path) {
-        return path.matches("^.*[$]\\d+\\.class$");
+        return path.matches("^.*[$]\\d+.*$");
     }
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
                 Case($(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
                 Case($(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> Asserts.fail("class file type")));
+                Case($(), () -> Asserts.fail("class file type"))
+        );
     }
 
     @SneakyThrows
@@ -84,7 +89,7 @@ public final class $ {
     }
 
     private static boolean matchLimited(int ignoreVisibilities, ClassReader reader) {
-        return isIgnoreClassVisibility(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
+        return isClassVisibilityIgnored(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
     }
 
     private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
@@ -97,30 +102,20 @@ public final class $ {
         return Objects.equals(type, Type.LONG_TYPE) || Objects.equals(type, Type.DOUBLE_TYPE);
     }
 
-    //TODO
-    private static boolean isExtend(String superName, List<String> interfaces, ClassReader reader) {
-        return Stream.concat(Stream.of(superName), interfaces.stream())
-                     .allMatch(isIn(NameUtils.calcInternalNames(interfaces)).or(is(NameUtils.calcInternalName(getSuperName(reader)))));
-    }
-
-    private static String getSuperName(ClassReader reader) {
-        return Objects.isNull(reader.getSuperName()) ? "java/lang/Object" : reader.getSuperName();
-    }
-
     public static boolean matchPackages(List<String> packages, String path) {
         return packages.stream().anyMatch(NameUtils.calcInternalName(path)::contains);
     }
 
-    public static boolean isIgnoreClassVisibility(int ignoreVisibilities) {
+    public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
         return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;
     }
 
-    public static boolean isIgnoreFieldVisibility(int ignoreVisibilities) {
+    public static boolean isFieldVisibilityIgnored(int ignoreVisibilities) {
         return (IGNORE_FIELD_VISIBILITY & ignoreVisibilities) > 0;
     }
 
 
-    public static boolean isIgnoreMethodVisibility(int ignoreVisibilities) {
+    public static boolean isMethodVisibilityIgnored(int ignoreVisibilities) {
         return (IGNORE_METHOD_VISIBILITY & ignoreVisibilities) > 0;
     }
 

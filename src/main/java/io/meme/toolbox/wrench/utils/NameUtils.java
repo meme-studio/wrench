@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
 
 /**
  * @author meme
@@ -24,12 +25,11 @@ public final class NameUtils {
                       .substring(0, longClassName.lastIndexOf("."));
     }
 
-    //FIXME
     public static String calcInternalName(String name) {
         return Objects.requireNonNull(name)
                       .replace('/', '.')
                       .replace('\\', '.')
-                      .replace('$', '.');
+                      .replaceAll("(\\${2})+", Matcher.quoteReplacement("$."));
     }
 
     public static String[] calcInternalNames(List<String> names) {

@@ -2,8 +2,6 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.message.MethodMessage;
-import jdk.internal.org.objectweb.asm.ClassReader;
-import jdk.internal.org.objectweb.asm.tree.ClassNode;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,10 +12,8 @@ class WrenchTest {
 
     @Test
     void scan() throws IOException {
-        ClassReader classReader = new ClassReader("java.lang.Integer");
-        ClassNode classVisitor = new ClassNode();
-        classReader.accept(classVisitor, 0);
-        Result scan = Wrench.wrench().ignoreMethodVisibility().includePackages("io.meme.toolbox.wrench").scan();
+        ClassMessage message = ClassMessage.of(ArrayList.class);
+        Result scan = Wrench.wrench().ignoreClassVisibility().ignoreMethodVisibility().includePackages("io.meme.toolbox.wrench").scan();
         scan.getClassMessages()
             .values()
             .stream()

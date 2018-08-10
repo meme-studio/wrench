@@ -7,18 +7,21 @@ import io.meme.toolbox.wrench.utils.NameUtils;
 import io.vavr.Function3;
 import io.vavr.Predicates;
 import io.vavr.control.Option;
+import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Type;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -47,6 +50,19 @@ public class ClassMessage extends ClassResolver implements Serializable {
     private List<FieldMessage> fieldMessages = new ArrayList<>();
 
     private final int ignoreVisibilities;
+
+    //FIXME for array type
+    public static ClassMessage of(Class<?> clazz) {
+        return of(clazz.getName());
+    }
+
+    @SneakyThrows
+    public static ClassMessage of(String className) {
+        ClassReader reader = new ClassReader(className);
+        ClassMessage message = ClassMessage.of($.IGNORE_VISIBILITIES);
+        reader.accept(message, 0);
+        return message;
+    }
 
     public List<String> listSuperClassAndInterfaceNames() {
         return Stream.concat(interfaceNames.stream(), Stream.of(superClassName))
@@ -89,7 +105,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        return visitAndReturn(access, name, desc, this::calcFieldMessage);
+        return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> $.isFieldVisibilityIgnored(ignoreVisibilities));
     }
 
     private FieldMessage calcFieldMessage(String name, String desc, int access) {
@@ -100,12 +116,12 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return visitAndReturn(access, name, desc, this::calcMethodMessage);
+        return visitAndReturn(access, name, desc, this::calcMethodMessage, ignore -> $.isMethodVisibilityIgnored(ignoreVisibilities));
     }
 
-    private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator) {
+    private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator, Predicate<Integer> isAccessIgnore) {
         return Option.of(access)
-                     .filter(Predicates.anyOf(ignore -> $.isIgnoreFieldVisibility(ignoreVisibilities), AccessUtils::isPublic))
+                     .filter(Predicates.anyOf(isAccessIgnore, AccessUtils::isPublic))
                      .map(messageGenerator.apply(name, desc))
                      .getOrNull();
     }
