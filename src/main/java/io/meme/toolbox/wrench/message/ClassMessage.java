@@ -58,10 +58,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @SneakyThrows
     public static ClassMessage of(String className) {
-        ClassReader reader = new ClassReader(className);
-        ClassMessage message = ClassMessage.of($.IGNORE_VISIBILITIES);
-        reader.accept(message, 0);
-        return message;
+        return $.getClassMessage($.IGNORE_VISIBILITIES, new ClassReader(className));
     }
 
     public List<String> listSuperClassAndInterfaceNames() {
@@ -134,7 +131,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
     }
 
     /**
-     * Reference to Spring {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer.LocalVariableTableVisitor#computeLvtSlotIndices(boolean, org.springframework.asm.Type[])}
+     * Reference to Spring org.springframework.core.LocalVariableTableParameterNameDiscoverer.LocalVariableTableVisitor.computeLvtSlotIndices(boolean, org.springframework.asm.Type[])
      */
     private static List<ArgumentMessage> calcArgumentMessages(boolean isStatic, Type[] paramTypes) {
         return IntStream.range(0, paramTypes.length)

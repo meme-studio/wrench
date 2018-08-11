@@ -92,9 +92,9 @@ public final class $ {
         return isClassVisibilityIgnored(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
     }
 
-    private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
+    public static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
         ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
-        reader.accept(classMessage, 0);
+        reader.accept(classMessage, ClassReader.SKIP_FRAMES);
         return classMessage;
     }
 

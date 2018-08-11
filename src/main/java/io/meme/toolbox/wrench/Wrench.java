@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.*;
  */
 @Accessors(fluent = true)
 @Setter(AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE, staticName = "wrench")
+@NoArgsConstructor(staticName = "wrench")
 public final class Wrench {
 
     private int ignoreVisibilities = $.INVISIBLE;
