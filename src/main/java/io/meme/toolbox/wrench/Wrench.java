@@ -4,10 +4,7 @@ import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.Predicates;
 import io.vavr.API;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Setter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
 
@@ -34,48 +31,32 @@ import static java.util.stream.Collectors.*;
  * @author meme
  * @since 2018/7/23
  */
-@Builder
+@Accessors(fluent = true)
+@Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE, staticName = "wrench")
 public final class Wrench {
 
-    @Builder.Default
     private int ignoreVisibilities = $.INVISIBLE;
-
-    @Builder.Default
-    @Accessors(fluent = true)
-    @Setter(AccessLevel.PRIVATE)
-    private List<String> includePackages = emptyList();
-
-    @Builder.Default
-    @Accessors(fluent = true)
-    @Setter(AccessLevel.PRIVATE)
-    private List<String> excludePackages = emptyList();
-
-    public static Wrench wrench() {
-        return Wrench.builder().build();
-    }
+    private List<String> includePackages, excludePackages = emptyList();
 
     public static Result scanDirectly() {
         return wrench().scan();
     }
 
     public Wrench ignoreMethodVisibility() {
-        ignoreVisibilities |= $.IGNORE_METHOD_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_METHOD_VISIBILITY);
     }
 
     public Wrench ignoreClassVisibility() {
-        ignoreVisibilities |= $.IGNORE_CLASS_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_CLASS_VISIBILITY);
     }
 
     public Wrench ignoreFieldVisibility() {
-        ignoreVisibilities |= $.IGNORE_FIELD_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_FIELD_VISIBILITY);
     }
 
     public Wrench ignoreVisibilities() {
-        ignoreVisibilities = $.IGNORE_VISIBILITIES;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_VISIBILITIES);
     }
 
     @Tolerate
