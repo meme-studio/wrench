@@ -71,7 +71,8 @@ public class MethodMessage extends MethodResolver implements Serializable {
 
     private String getNonStaticMethodDescription() {
         String argumentsDescription = getArgumentsDescription();
-        return getMethodPrefix().concat(isVarargs() ? argumentsDescription.replaceAll("(\\[])(?!.*\\1)", "...") : argumentsDescription);
+        return getMethodPrefix().concat(
+                isVarargs() ? argumentsDescription.replaceAll("(\\[])(?!.*\\1)", "...") : argumentsDescription);
     }
 
     private String getArgumentsDescription() {
@@ -81,25 +82,27 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     private String getMethodPrefix() {
-        String[] prefixes =
-                isConstructor()
-                        ?
-                        new String[]{
-                                AccessUtils.getAccessType(access),
-                                NameUtils.calcSimpleClassName(className)
-                        }
-                        :
-                        new String[]{
-                                AccessUtils.getAccessType(access),
-                                AccessUtils.getStaticOrAbstract(access),
-                                AccessUtils.getSynchronized(access),
-                                AccessUtils.getFinal(access),
-                                getReturnType(),
-                                name
-                        };
-        return Stream.of(prefixes)
+        return Stream.of(isConstructor() ? constructorPrefixes() : nonConstructorPrefixes())
                      .filter(Predicate.isEqual("").negate())
                      .collect(joining(" "));
+    }
+
+    private String[] nonConstructorPrefixes() {
+        return new String[]{
+                AccessUtils.getAccessType(access),
+                AccessUtils.getStaticOrAbstract(access),
+                AccessUtils.getSynchronized(access),
+                AccessUtils.getFinal(access),
+                getReturnType(),
+                name
+        };
+    }
+
+    private String[] constructorPrefixes() {
+        return new String[]{
+                AccessUtils.getAccessType(access),
+                NameUtils.calcSimpleClassName(className)
+        };
     }
 
     public String getReturnType() {
