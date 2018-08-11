@@ -14,13 +14,13 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class ArgumentMessage implements Serializable {
     private static final long serialVersionUID = -2807593115732931530L;
-    private final String longTypeName;
+    private final String typeName;
     @Setter(AccessLevel.PACKAGE)
     @EqualsAndHashCode.Include
     private String argumentName;
     @Getter(AccessLevel.PACKAGE)
-    private final int lvtSlotIndex;
+    private final int index;
     public String getShortTypeName() {
-        return NameUtils.calcSimpleClassName(longTypeName);
+        return NameUtils.calcSimpleClassName(typeName);
     }
 }

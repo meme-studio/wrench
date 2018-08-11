@@ -24,6 +24,10 @@ public class FieldMessage extends FieldResolver implements Serializable {
     private final String longTypeName;
     private final int access;
 
+    public boolean isVolatile() {
+        return AccessUtils.isVolatile(access);
+    }
+
     public boolean isStatic() {
         return AccessUtils.isStatic(access);
     }

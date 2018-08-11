@@ -4,6 +4,7 @@ import io.meme.toolbox.wrench.message.resolver.ClassResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
+import io.vavr.Function2;
 import io.vavr.Function3;
 import io.vavr.Predicates;
 import io.vavr.control.Option;
@@ -15,13 +16,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.experimental.ExtensionMethod;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,6 +32,7 @@ import java.util.stream.Stream;
  */
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@ExtensionMethod({AccessUtils.class, Arrays.class})
 public class ClassMessage extends ClassResolver implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
 
@@ -53,7 +54,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     //FIXME for array type
     public static ClassMessage of(Class<?> clazz) {
-        return of(clazz.getName());
+        return of(clazz.getTypeName());
     }
 
     @SneakyThrows
@@ -118,7 +119,8 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator, Predicate<Integer> isAccessIgnore) {
         return Option.of(access)
-                     .filter(Predicates.anyOf(isAccessIgnore, AccessUtils::isPublic))
+                     .filter(Predicates.anyOf(isAccessIgnore, AccessUtils::isPublic)
+                                       .and(Predicates.noneOf(AccessUtils::isSynthetic)))
                      .map(messageGenerator.apply(name, desc))
                      .getOrNull();
     }

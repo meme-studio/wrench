@@ -53,10 +53,23 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return Objects.equals("<clinit>", name);
     }
 
+    public boolean isVarargs() {
+        return AccessUtils.isVarargs(access);
+    }
+
     public String getMethodDescription() {
+        return isClinit() ? "{}" : getNonStaticMethodDescription();
+    }
+
+    private String getNonStaticMethodDescription() {
+        String argumentsDescription = getArgumentsDescription();
+        return getMethodPrefix().concat(isVarargs() ? argumentsDescription.replaceAll("(\\[])(?!.*\\1)", "...") : argumentsDescription);
+    }
+
+    private String getArgumentsDescription() {
         return argumentMessages.stream()
-                               .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
-                               .collect(joining(", ", String.format("%s(", getMethodPrefix()), ")"));
+                               .map(argument -> String.format("%s %s", argument.getTypeName(), argument.getArgumentName()))
+                               .collect(joining(", ", "(", ")"));
     }
 
     private String getMethodPrefix() {
@@ -89,7 +102,7 @@ public class MethodMessage extends MethodResolver implements Serializable {
         argumentMessages.stream()
                         .filter(Predicates.of(Function2.of(Objects::equals)
                                                        .apply(index)
-                                                       .compose(ArgumentMessage::getLvtSlotIndex)))
+                                                       .compose(ArgumentMessage::getIndex)))
                         .findAny()
                         .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
     }
