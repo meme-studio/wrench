@@ -41,6 +41,10 @@ public final class AccessUtils {
         return is(Opcodes.ACC_PROTECTED, access);
     }
 
+    public static boolean isPackage(int access) {
+        return !(isPublic(access) && isPrivate(access) && isProtected(access));
+    }
+
     public static boolean isSynchronized(int access) {
         return is(Opcodes.ACC_SYNCHRONIZED, access);
     }
