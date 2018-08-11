@@ -37,7 +37,7 @@ public class Result {
 
     public Result byTypes(Class<?>... classes) {
         return byTypes($.listClassNames(classes)).stream()
-                                                 .collect(collectingAndThen(toList(), Result::of));
+                                                 .collect($.toResult());
     }
 
     public Result byNames(Class<?>... classes) {
