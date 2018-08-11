@@ -12,7 +12,7 @@ import static io.vavr.API.*;
  * @since 2018/7/30
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class AccessUtils {
+public final class AccessUtils {
     public static boolean isAbstract(int access) {
         return (Opcodes.ACC_ABSTRACT & access) > 0;
     }

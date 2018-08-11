@@ -27,7 +27,9 @@ import static java.util.stream.Collectors.joining;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class MethodMessage extends MethodResolver implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
+    @Getter
     private final String className;
+    @Getter
     private final String name;
     @EqualsAndHashCode.Include
     private final String desc;

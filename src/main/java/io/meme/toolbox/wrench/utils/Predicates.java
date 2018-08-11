@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * @since 2018/8/3
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Predicates {
+public final class Predicates {
 
     public static <T> Predicate<T> of(Predicate<T> predicate) {
         return Objects.requireNonNull(predicate);
