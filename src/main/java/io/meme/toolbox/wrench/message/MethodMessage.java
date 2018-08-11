@@ -37,6 +37,10 @@ public class MethodMessage extends MethodResolver implements Serializable {
     @Getter
     private final List<ArgumentMessage> argumentMessages;
 
+    public boolean isFinal() {
+        return AccessUtils.isFinal(access);
+    }
+
     public boolean isAbstract() {
         return AccessUtils.isAbstract(access);
     }
@@ -55,6 +59,10 @@ public class MethodMessage extends MethodResolver implements Serializable {
 
     public boolean isVarargs() {
         return AccessUtils.isVarargs(access);
+    }
+
+    public boolean isSynchronized() {
+        return AccessUtils.isSynchronized(access);
     }
 
     public String getMethodDescription() {
@@ -85,6 +93,7 @@ public class MethodMessage extends MethodResolver implements Serializable {
                                 AccessUtils.getAccessType(access),
                                 AccessUtils.getStaticOrAbstract(access),
                                 AccessUtils.getSynchronized(access),
+                                AccessUtils.getFinal(access),
                                 getReturnType(),
                                 name
                         };

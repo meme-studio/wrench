@@ -3,6 +3,7 @@ package io.meme.toolbox.wrench.message;
 import io.meme.toolbox.wrench.message.resolver.FieldResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
+import jdk.internal.org.objectweb.asm.Opcodes;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,12 +25,20 @@ public class FieldMessage extends FieldResolver implements Serializable {
     private final String longTypeName;
     private final int access;
 
+    public boolean isFinal() {
+        return AccessUtils.isFinal(access);
+    }
+
     public boolean isVolatile() {
         return AccessUtils.isVolatile(access);
     }
 
     public boolean isStatic() {
         return AccessUtils.isStatic(access);
+    }
+
+    public boolean isTransient() {
+        return AccessUtils.isTransient(access);
     }
 
     private String getTypeName() {

@@ -12,7 +12,7 @@ import static io.vavr.API.*;
  * @since 2018/7/30
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class AccessUtils {
+public final class AccessUtils {
     public static boolean isAbstract(int access) {
         return is(Opcodes.ACC_ABSTRACT, access);
     }
@@ -57,6 +57,14 @@ public class AccessUtils {
         return is(Opcodes.ACC_SYNTHETIC, access);
     }
 
+    public static boolean isFinal(int access) {
+        return is(Opcodes.ACC_FINAL, access);
+    }
+
+    public static boolean isTransient(int access) {
+        return is(Opcodes.ACC_TRANSIENT, access);
+    }
+
     private static boolean is(Integer access, int accessType) {
         return (accessType & access) > 0;
     }
@@ -81,6 +89,13 @@ public class AccessUtils {
     public static String getSynchronized(int access) {
         return Match(access).of(
                 Case($(AccessUtils::isSynchronized), "synchronized"),
+                Case($(), "")
+        );
+    }
+
+    public static String getFinal(int access) {
+        return Match(access).of(
+                Case($(AccessUtils::isFinal), "final"),
                 Case($(), "")
         );
     }

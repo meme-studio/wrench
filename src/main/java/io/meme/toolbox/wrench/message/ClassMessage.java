@@ -68,6 +68,10 @@ public class ClassMessage extends ClassResolver implements Serializable {
                      .collect(Collectors.toList());
     }
 
+    public boolean isFinal() {
+        return AccessUtils.isFinal(access);
+    }
+
     public String getSimpleName() {
         return NameUtils.calcSimpleClassName(name);
     }

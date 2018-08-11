@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.message;
 
+import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import lombok.*;
 
@@ -20,7 +21,13 @@ public class ArgumentMessage implements Serializable {
     private String argumentName;
     @Getter(AccessLevel.PACKAGE)
     private final int index;
+
     public String getShortTypeName() {
         return NameUtils.calcSimpleClassName(typeName);
+    }
+
+    //TODO
+    public boolean isFinal() {
+        return false;
     }
 }
