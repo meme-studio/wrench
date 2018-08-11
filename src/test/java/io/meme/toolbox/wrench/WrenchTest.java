@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench;
 
+import io.meme.toolbox.wrench.message.ClassMessage;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ class WrenchTest {
                             .ignoreClassVisibility()
                             .includePackages("java")
                             .scan();
-        Result result = scan.byTypes(List.class);
+        Map<String, List<ClassMessage>> stringListMap = scan.groupingByPackageName();
 //        scan.getClassMessages()
 //            .values()
 //            .stream()

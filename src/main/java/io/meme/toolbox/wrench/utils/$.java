@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.utils;
 
+import io.meme.toolbox.wrench.Result;
 import io.meme.toolbox.wrench.message.ClassMessage;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.Type;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +22,8 @@ import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
 import static io.vavr.Predicates.isIn;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author meme
@@ -112,6 +116,11 @@ public final class $ {
                      .map(Class::getName)
                      .collect(Collectors.toList());
     }
+
+    public static Collector<ClassMessage, ?, Result> toResult() {
+        return collectingAndThen(toList(), Result::of);
+    }
+
 
     public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
         return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;

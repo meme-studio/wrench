@@ -10,12 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author meme
@@ -25,20 +27,41 @@ import static java.util.stream.Collectors.toMap;
 @AllArgsConstructor(staticName = "of")
 public class Result {
 
-    private final Map<String, ClassMessage> classMessages;
+    private final List<ClassMessage> classMessages;
 
-    public Set<String> getNamesOfClassMessages() {
-        return classMessages.keySet();
+    public Set<String> listClassNames() {
+        return classMessages.stream()
+                            .map(ClassMessage::getName)
+                            .collect(Collectors.toSet());
     }
 
     public Result byTypes(Class<?>... classes) {
         return byTypes($.listClassNames(classes)).stream()
-                                                 .collect(collectingAndThen(toMap(ClassMessage::getName, identity()), Result::of));
+                                                 .collect(collectingAndThen(toList(), Result::of));
+    }
+
+    public Result byNames(Class<?>... classes) {
+        return by($.listClassNames(classes).toArray(), ClassMessage::getName);
+    }
+
+    public Result byPackages(String... packageNames) {
+        return by(packageNames, ClassMessage::getPackageName);
+    }
+
+    public Map<String, List<ClassMessage>> groupingByPackageName() {
+        return classMessages.stream()
+                            .collect(groupingBy(ClassMessage::getPackageName));
+    }
+
+    private <T> Result by(T[] conditions, Function<ClassMessage, T> function) {
+        return classMessages.stream()
+                            .filter(PredicateEx.of(PredicateEx.toFunction(Predicates.isIn(conditions))
+                                                              .compose(function)))
+                            .collect($.toResult());
     }
 
     private List<ClassMessage> byTypes(List<String> types) {
-        return classMessages.values()
-                            .stream()
+        return classMessages.stream()
                             .filter(PredicateEx.of(Function2.of(this::isMatchTypes).apply(types)))
                             .collect(collectingAndThen(Collectors.toList(), Function2.<List<String>, List<ClassMessage>, List<ClassMessage>>of(this::byTypes).apply(types)));
     }
@@ -57,8 +80,6 @@ public class Result {
         return Stream.concat(classMessage.getInterfaceNames().stream(), Stream.of(classMessage.getSuperClassName(), classMessage.getName()))
                      .anyMatch(Predicates.isIn(classNames.toArray()));
     }
-
-
 
 
 }

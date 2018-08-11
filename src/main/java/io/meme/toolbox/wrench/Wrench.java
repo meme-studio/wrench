@@ -74,7 +74,7 @@ public final class Wrench {
                      .flatMap(this::scan)
                      .filter(Objects::nonNull)
                      .distinct()
-                     .collect(collectingAndThen(toMap(ClassMessage::getName, identity()), Result::of));
+                     .collect($.toResult());
     }
 
     @SneakyThrows

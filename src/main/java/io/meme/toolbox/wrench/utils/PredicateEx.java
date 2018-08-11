@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.utils;
 
+import io.vavr.Predicates;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,10 @@ public final class PredicateEx {
 
     public static <T> Predicate<T> negate(Function<T, Boolean> function) {
         return of(function).negate();
+    }
+
+    public static <T> Function<T, Boolean> toFunction(Predicate<T> predicate) {
+        return Objects.requireNonNull(predicate)::test;
     }
 
 }
