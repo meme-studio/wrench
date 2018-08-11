@@ -62,12 +62,6 @@ public class ClassMessage extends ClassResolver implements Serializable {
         return $.getClassMessage($.IGNORE_VISIBILITIES, new ClassReader(className));
     }
 
-    public List<String> listSuperClassAndInterfaceNames() {
-        return Stream.concat(interfaceNames.stream(), Stream.of(superClassName))
-                     .filter(Objects::nonNull)
-                     .collect(Collectors.toList());
-    }
-
     public boolean isFinal() {
         return AccessUtils.isFinal(access);
     }
@@ -101,8 +95,11 @@ public class ClassMessage extends ClassResolver implements Serializable {
         this.name = NameUtils.calcInternalName(name);
         this.signature = signature;
         this.access = access;
-        this.superClassName = superName;
-        this.interfaceNames = Arrays.asList(interfaces);
+        this.superClassName = Option.of(superName)
+                                    .filter(Objects::nonNull)
+                                    .map(NameUtils::calcInternalName)
+                                    .getOrNull();
+        this.interfaceNames = Arrays.asList(NameUtils.calcInternalNames(interfaces));
     }
 
     @Override

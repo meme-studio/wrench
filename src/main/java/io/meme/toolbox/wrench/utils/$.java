@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
@@ -83,7 +84,7 @@ public final class $ {
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
-                                             .filter(Predicates.of(Function($::matchLimited).apply(ignoreVisibilities)))
+                                             .filter(PredicateEx.of(Function($::matchLimited).apply(ignoreVisibilities)))
                                              .map(Function($::getClassMessage).apply(ignoreVisibilities))
                                              .getOrNull();
     }
@@ -104,6 +105,12 @@ public final class $ {
 
     public static boolean matchPackages(List<String> packages, String path) {
         return packages.stream().anyMatch(NameUtils.calcInternalName(path)::contains);
+    }
+
+    public static List<String> listClassNames(Class<?>... className) {
+        return Stream.of(className)
+                     .map(Class::getName)
+                     .collect(Collectors.toList());
     }
 
     public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
