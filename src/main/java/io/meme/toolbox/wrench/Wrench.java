@@ -2,12 +2,9 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
-import io.meme.toolbox.wrench.utils.Predicates;
+import io.meme.toolbox.wrench.utils.PredicateEx;
 import io.vavr.API;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Setter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
 
@@ -34,48 +31,32 @@ import static java.util.stream.Collectors.*;
  * @author meme
  * @since 2018/7/23
  */
-@Builder
+@Accessors(fluent = true)
+@Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(staticName = "wrench")
 public final class Wrench {
 
-    @Builder.Default
     private int ignoreVisibilities = $.INVISIBLE;
-
-    @Builder.Default
-    @Accessors(fluent = true)
-    @Setter(AccessLevel.PRIVATE)
-    private List<String> includePackages = emptyList();
-
-    @Builder.Default
-    @Accessors(fluent = true)
-    @Setter(AccessLevel.PRIVATE)
-    private List<String> excludePackages = emptyList();
-
-    public static Wrench wrench() {
-        return Wrench.builder().build();
-    }
+    private List<String> includePackages, excludePackages = emptyList();
 
     public static Result scanDirectly() {
         return wrench().scan();
     }
 
     public Wrench ignoreMethodVisibility() {
-        ignoreVisibilities |= $.IGNORE_METHOD_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_METHOD_VISIBILITY);
     }
 
     public Wrench ignoreClassVisibility() {
-        ignoreVisibilities |= $.IGNORE_CLASS_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_CLASS_VISIBILITY);
     }
 
     public Wrench ignoreFieldVisibility() {
-        ignoreVisibilities |= $.IGNORE_FIELD_VISIBILITY;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_FIELD_VISIBILITY);
     }
 
     public Wrench ignoreVisibilities() {
-        ignoreVisibilities = $.IGNORE_VISIBILITIES;
-        return this;
+        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_VISIBILITIES);
     }
 
     @Tolerate
@@ -93,7 +74,7 @@ public final class Wrench {
                      .flatMap(this::scan)
                      .filter(Objects::nonNull)
                      .distinct()
-                     .collect(collectingAndThen(toMap(ClassMessage::getName, identity()), Result::of));
+                     .collect($.toResult());
     }
 
     @SneakyThrows
@@ -115,9 +96,9 @@ public final class Wrench {
 
     private Stream<ClassMessage> scanClassType(List<String> paths) {
         return paths.stream()
-                    .filter(Predicates.negate($::isAnonymousClass))
-                    .filter(Predicates.of(Function($::matchPackages).apply(includePackages)))
-                    .filter(Predicates.negate(Function($::matchPackages).apply(excludePackages)))
+                    .filter(PredicateEx.negate($::isAnonymousClass))
+                    .filter(PredicateEx.of(Function($::matchPackages).apply(includePackages)))
+                    .filter(PredicateEx.negate(Function($::matchPackages).apply(excludePackages)))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
                     .map(Function($::determineClassMessage).apply(ignoreVisibilities));
@@ -137,10 +118,10 @@ public final class Wrench {
 
     private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
         return entry.getValue()
-                    .filter(Predicates.of(Function($::isClassFileType).compose(JarEntry::getName)))
-                    .filter(Predicates.negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
-                    .filter(Predicates.of(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
-                    .filter(Predicates.negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
+                    .filter(PredicateEx.of(Function($::isClassFileType).compose(JarEntry::getName)))
+                    .filter(PredicateEx.negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
+                    .filter(PredicateEx.of(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
+                    .filter(PredicateEx.negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
                     .map(Function($::getClassInputStream).apply(entry))
                     .map(Function($::determineClassMessage).apply(ignoreVisibilities));
     }

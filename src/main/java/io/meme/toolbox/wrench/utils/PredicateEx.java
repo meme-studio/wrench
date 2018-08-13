@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.utils;
 
+import io.vavr.Predicates;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ import java.util.function.Predicate;
  * @since 2018/8/3
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Predicates {
+public final class PredicateEx {
 
     public static <T> Predicate<T> of(Predicate<T> predicate) {
         return Objects.requireNonNull(predicate);
@@ -24,6 +25,10 @@ public class Predicates {
 
     public static <T> Predicate<T> negate(Function<T, Boolean> function) {
         return of(function).negate();
+    }
+
+    public static <T> Function<T, Boolean> toFunction(Predicate<T> predicate) {
+        return Objects.requireNonNull(predicate)::test;
     }
 
 }

@@ -3,7 +3,7 @@ package io.meme.toolbox.wrench.message;
 import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
-import io.meme.toolbox.wrench.utils.Predicates;
+import io.meme.toolbox.wrench.utils.PredicateEx;
 import io.vavr.Function2;
 import jdk.internal.org.objectweb.asm.Label;
 import jdk.internal.org.objectweb.asm.Type;
@@ -27,13 +27,19 @@ import static java.util.stream.Collectors.joining;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class MethodMessage extends MethodResolver implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
+    @Getter
     private final String className;
+    @Getter
     private final String name;
     @EqualsAndHashCode.Include
     private final String desc;
     private final int access;
     @Getter
     private final List<ArgumentMessage> argumentMessages;
+
+    public boolean isFinal() {
+        return AccessUtils.isFinal(access);
+    }
 
     public boolean isAbstract() {
         return AccessUtils.isAbstract(access);
@@ -51,32 +57,52 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return Objects.equals("<clinit>", name);
     }
 
+    public boolean isVarargs() {
+        return AccessUtils.isVarargs(access);
+    }
+
+    public boolean isSynchronized() {
+        return AccessUtils.isSynchronized(access);
+    }
+
     public String getMethodDescription() {
-        return isStatic() ? "static {}" :
-                argumentMessages.stream()
-                                .map(argument -> String.format("%s %s", argument.getLongTypeName(), argument.getArgumentName()))
-                                .collect(joining(", ", String.format("%s(", getMethodPrefix()), ")"));
+        return isClinit() ? "static {}" : getNonStaticMethodDescription();
+    }
+
+    private String getNonStaticMethodDescription() {
+        String argumentsDescription = getArgumentsDescription();
+        return getMethodPrefix().concat(
+                isVarargs() ? argumentsDescription.replaceAll("(\\[])(?!.*\\1)", "...") : argumentsDescription);
+    }
+
+    private String getArgumentsDescription() {
+        return argumentMessages.stream()
+                               .map(argument -> String.format("%s %s", argument.getTypeName(), argument.getArgumentName()))
+                               .collect(joining(", ", "(", ")"));
     }
 
     private String getMethodPrefix() {
-        String[] prefixes =
-                isConstructor()
-                        ?
-                        new String[]{
-                                AccessUtils.getAccessType(access),
-                                NameUtils.calcSimpleClassName(className)
-                        }
-                        :
-                        new String[]{
-                                AccessUtils.getAccessType(access),
-                                AccessUtils.getStaticOrAbstract(access),
-                                AccessUtils.getSynchronized(access),
-                                getReturnType(),
-                                name
-                        };
-        return Stream.of(prefixes)
+        return Stream.of(isConstructor() ? constructorPrefixes() : nonConstructorPrefixes())
                      .filter(Predicate.isEqual("").negate())
                      .collect(joining(" "));
+    }
+
+    private String[] nonConstructorPrefixes() {
+        return new String[]{
+                AccessUtils.getAccessType(access),
+                AccessUtils.getStaticOrAbstract(access),
+                AccessUtils.getSynchronized(access),
+                AccessUtils.getFinal(access),
+                getReturnType(),
+                name
+        };
+    }
+
+    private String[] constructorPrefixes() {
+        return new String[]{
+                AccessUtils.getAccessType(access),
+                NameUtils.calcSimpleClassName(className)
+        };
     }
 
     public String getReturnType() {
@@ -86,9 +112,9 @@ public class MethodMessage extends MethodResolver implements Serializable {
     @Override
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
         argumentMessages.stream()
-                        .filter(Predicates.of(Function2.of(Objects::equals)
-                                                       .apply(index)
-                                                       .compose(ArgumentMessage::getLvtSlotIndex)))
+                        .filter(PredicateEx.of(Function2.of(Objects::equals)
+                                                        .apply(index)
+                                                        .compose(ArgumentMessage::getIndex)))
                         .findAny()
                         .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
     }

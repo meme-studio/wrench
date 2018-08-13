@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.utils;
 
+import io.meme.toolbox.wrench.Result;
 import io.meme.toolbox.wrench.message.ClassMessage;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.Type;
@@ -12,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
@@ -19,6 +22,8 @@ import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
 import static io.vavr.Predicates.isIn;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author meme
@@ -83,7 +88,7 @@ public final class $ {
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
-                                             .filter(Predicates.of(Function($::matchLimited).apply(ignoreVisibilities)))
+                                             .filter(PredicateEx.of(Function($::matchLimited).apply(ignoreVisibilities)))
                                              .map(Function($::getClassMessage).apply(ignoreVisibilities))
                                              .getOrNull();
     }
@@ -92,9 +97,9 @@ public final class $ {
         return isClassVisibilityIgnored(ignoreVisibilities) || AccessUtils.isPublic(reader.getAccess());
     }
 
-    private static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
+    public static ClassMessage getClassMessage(int ignoreVisibilities, ClassReader reader) {
         ClassMessage classMessage = ClassMessage.of(ignoreVisibilities);
-        reader.accept(classMessage, 0);
+        reader.accept(classMessage, ClassReader.SKIP_FRAMES);
         return classMessage;
     }
 
@@ -105,6 +110,17 @@ public final class $ {
     public static boolean matchPackages(List<String> packages, String path) {
         return packages.stream().anyMatch(NameUtils.calcInternalName(path)::contains);
     }
+
+    public static List<String> listClassNames(Class<?>... className) {
+        return Stream.of(className)
+                     .map(Class::getName)
+                     .collect(Collectors.toList());
+    }
+
+    public static Collector<ClassMessage, ?, Result> toResult() {
+        return collectingAndThen(toList(), Result::of);
+    }
+
 
     public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
         return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;

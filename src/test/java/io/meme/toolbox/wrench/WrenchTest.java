@@ -1,7 +1,6 @@
 package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
-import io.meme.toolbox.wrench.message.MethodMessage;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,15 +11,20 @@ class WrenchTest {
 
     @Test
     void scan() throws IOException {
-        ClassMessage message = ClassMessage.of(int.class);
-        Result scan = Wrench.wrench().ignoreClassVisibility().ignoreMethodVisibility().includePackages("io.meme.toolbox.wrench").scan();
-        scan.getClassMessages()
-            .values()
-            .stream()
-            .map(ClassMessage::getMethodMessages)
-            .flatMap(List::stream)
-            .map(MethodMessage::getMethodDescription)
-            .forEach(System.out::println);
+//        ClassMessage message = ClassMessage.of(Collections.class);
+//        message.getMethodMessages().stream().map(MethodMessage::getMethodDescription).forEach(System.out::println);
+        Result scan = Wrench.wrench()
+                            .ignoreClassVisibility()
+                            .includePackages("java")
+                            .scan();
+        Map<String, List<ClassMessage>> stringListMap = scan.groupingByPackageName();
+//        scan.getClassMessages()
+//            .values()
+//            .stream()
+//            .map(ClassMessage::getMethodMessages)
+//            .flatMap(List::stream)
+//            .map(MethodMessage::getMethodDescription)
+//            .forEach(System.out::println);
         System.out.println();
     }
 
