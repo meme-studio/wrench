@@ -29,8 +29,11 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
 /**
+ * Wrench是一个基于ow2 asm驱动的类扫描与解析工具。
+ * <p>{@link Wrench} 是整个工具的入口，提供了直接扫描 {@link Wrench#scanDirectly()}，区配/排除包扫描以及对扫面类/成员/方法的可见性做可控配置。
+ *
  * @author meme
- * @since 2018/7/23
+ * @since 1.0
  */
 @Accessors(fluent = true)
 @Setter(AccessLevel.PRIVATE)
@@ -41,6 +44,9 @@ public final class Wrench {
     private List<String> includePackages = singletonList("");
     private List<String> excludePackages = emptyList();
 
+    /**
+     *  对java.class.path下所有类进行扫描，只包含公开的类，成员变量与成员方法。
+     */
     public static Result scanDirectly() {
         return wrench().scan();
     }

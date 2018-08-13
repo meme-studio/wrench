@@ -41,8 +41,8 @@ public final class $ {
         private String suffixName;
     }
 
-    public static final String[] CLASSPATHS = Objects.requireNonNull(System.getProperty("java.class.path"))
-                                                     .split(File.pathSeparator);
+    @NonNull
+    public static final String[] CLASSPATHS = System.getProperty("java.class.path").split(File.pathSeparator);
 
     public static final int INVISIBLE = 0;
 
