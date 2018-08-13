@@ -1,6 +1,5 @@
 package io.meme.toolbox.wrench.message;
 
-import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import lombok.*;
 

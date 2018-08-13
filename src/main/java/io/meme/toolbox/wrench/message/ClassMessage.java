@@ -4,7 +4,6 @@ import io.meme.toolbox.wrench.message.resolver.ClassResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
-import io.vavr.Function2;
 import io.vavr.Function3;
 import io.vavr.Predicates;
 import io.vavr.control.Option;
@@ -19,12 +18,13 @@ import lombok.SneakyThrows;
 import lombok.experimental.ExtensionMethod;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @author meme
@@ -128,7 +128,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     private MethodMessage calcMethodMessage(String name, String desc, int access) {
         List<ArgumentMessage> argumentMessages = calcArgumentMessages(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
-        MethodMessage method = MethodMessage.of(this.name, name, desc, access, argumentMessages);
+        MethodMessage method = MethodMessage.of(this.name, name, NameUtils.calcInternalName(Type.getReturnType(desc).getClassName()), access, argumentMessages);
         methodMessages.add(method);
         return method;
     }

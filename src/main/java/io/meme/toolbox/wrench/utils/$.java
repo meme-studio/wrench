@@ -2,6 +2,7 @@ package io.meme.toolbox.wrench.utils;
 
 import io.meme.toolbox.wrench.Result;
 import io.meme.toolbox.wrench.message.ClassMessage;
+import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.Type;
 import lombok.*;
@@ -75,9 +76,9 @@ public final class $ {
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
-                Case($(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
-                Case($(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> Asserts.fail("class file type"))
+                API.Case(API.$(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
+                API.Case(API.$(is(CLASS.getSuffixName())), CLASS),
+                API.Case($(), () -> Asserts.fail("class file type"))
         );
     }
 

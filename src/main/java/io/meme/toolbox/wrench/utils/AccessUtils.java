@@ -4,9 +4,6 @@ import jdk.internal.org.objectweb.asm.Opcodes;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import static io.vavr.API.$;
-import static io.vavr.API.*;
-
 /**
  * @author meme
  * @since 2018/7/30
@@ -73,34 +70,4 @@ public final class AccessUtils {
         return (accessType & access) > 0;
     }
 
-    public static String getAccessType(int access) {
-        return Match(access).of(
-                Case($(AccessUtils::isPublic), "public"),
-                Case($(AccessUtils::isPrivate), "private"),
-                Case($(AccessUtils::isProtected), "protected"),
-                Case($(), "")
-        );
-    }
-
-    public static String getStaticOrAbstract(int access) {
-        return Match(access).of(
-                Case($(AccessUtils::isStatic), "static"),
-                Case($(AccessUtils::isAbstract), "abstract"),
-                Case($(), "")
-        );
-    }
-
-    public static String getSynchronized(int access) {
-        return Match(access).of(
-                Case($(AccessUtils::isSynchronized), "synchronized"),
-                Case($(), "")
-        );
-    }
-
-    public static String getFinal(int access) {
-        return Match(access).of(
-                Case($(AccessUtils::isFinal), "final"),
-                Case($(), "")
-        );
-    }
 }

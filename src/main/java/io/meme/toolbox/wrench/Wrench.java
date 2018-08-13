@@ -15,16 +15,13 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import static io.meme.toolbox.wrench.utils.Functions.*;
-import static io.vavr.API.Function;
+import static io.meme.toolbox.wrench.utils.Functions.negate;
+import static io.meme.toolbox.wrench.utils.Functions.predicate;
 import static io.vavr.API.unchecked;
 import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
@@ -40,7 +37,8 @@ import static java.util.stream.Collectors.*;
 public final class Wrench {
 
     private int ignoreVisibilities = $.INVISIBLE;
-    private List<String> includePackages, excludePackages = emptyList();
+    private List<String> includePackages = Collections.singletonList("");
+    private List<String> excludePackages = emptyList();
 
     public static Result scanDirectly() {
         return wrench().scan();
@@ -100,11 +98,11 @@ public final class Wrench {
     private Stream<ClassMessage> scanClassType(List<String> paths) {
         return paths.stream()
                     .filter(negate($::isAnonymousClass))
-                    .filter(predicate(Function($::matchPackages).apply(includePackages)))
-                    .filter(negate(Function($::matchPackages).apply(excludePackages)))
+                    .filter(predicate(API.Function($::matchPackages).apply(includePackages)))
+                    .filter(negate(API.Function($::matchPackages).apply(excludePackages)))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
+                    .map(API.Function($::determineClassMessage).apply(ignoreVisibilities));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -121,12 +119,12 @@ public final class Wrench {
 
     private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
         return entry.getValue()
-                    .filter(predicate(Function($::isClassFileType).compose(JarEntry::getName)))
-                    .filter(negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
-                    .filter(predicate(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
-                    .filter(negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
-                    .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(ignoreVisibilities));
+                    .filter(predicate(API.Function($::isClassFileType).compose(JarEntry::getName)))
+                    .filter(negate(API.Function($::isAnonymousClass).compose(JarEntry::getName)))
+                    .filter(predicate(API.Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
+                    .filter(negate(API.Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
+                    .map(API.Function($::getClassInputStream).apply(entry))
+                    .map(API.Function($::determineClassMessage).apply(ignoreVisibilities));
     }
 
 }

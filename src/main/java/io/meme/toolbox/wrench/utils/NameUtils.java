@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 
 /**
@@ -28,10 +27,6 @@ public final class NameUtils {
         return name.replace('/', '.')
                    .replace('\\', '.')
                    .replaceAll("(\\${2})+", Matcher.quoteReplacement("$."));
-    }
-
-    public static String[] calcInternalNames(@NonNull List<String> names) {
-        return calcInternalNames(names.toArray(new String[0]));
     }
 
     public static String[] calcInternalNames(@NonNull String... names) {

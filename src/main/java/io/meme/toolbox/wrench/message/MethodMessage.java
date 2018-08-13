@@ -2,16 +2,16 @@ package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
-import io.meme.toolbox.wrench.utils.NameUtils;
 import io.meme.toolbox.wrench.utils.Functions;
+import io.meme.toolbox.wrench.utils.NameUtils;
 import io.vavr.Function2;
 import jdk.internal.org.objectweb.asm.Label;
-import jdk.internal.org.objectweb.asm.Type;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -31,8 +31,8 @@ public class MethodMessage extends MethodResolver implements Serializable {
     private final String className;
     @Getter
     private final String name;
-    @EqualsAndHashCode.Include
-    private final String desc;
+    @Getter
+    private final String returnType;
     private final int access;
     @Getter
     private final List<ArgumentMessage> argumentMessages;
@@ -65,14 +65,15 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return AccessUtils.isSynchronized(access);
     }
 
-    public String getMethodDescription() {
+    @EqualsAndHashCode.Include
+    @Override
+    public String toString() {
         return isClinit() ? "static {}" : getNonStaticMethodDescription();
     }
 
     private String getNonStaticMethodDescription() {
-        String argumentsDescription = getArgumentsDescription();
-        return getMethodPrefix().concat(
-                isVarargs() ? argumentsDescription.replaceAll("(\\[])(?!.*\\1)", "...") : argumentsDescription);
+        String description = getArgumentsDescription();
+        return getMethodPrefix().concat(isVarargs() ? description.replaceAll("(\\[])(?!.*\\1)", "...") : description);
     }
 
     private String getArgumentsDescription() {
@@ -88,25 +89,11 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     private String[] nonConstructorPrefixes() {
-        return new String[]{
-                AccessUtils.getAccessType(access),
-                AccessUtils.getStaticOrAbstract(access),
-                AccessUtils.getSynchronized(access),
-                AccessUtils.getFinal(access),
-                getReturnType(),
-                name
-        };
+        return new String[]{Modifier.toString(access), getReturnType(), name};
     }
 
     private String[] constructorPrefixes() {
-        return new String[]{
-                AccessUtils.getAccessType(access),
-                NameUtils.calcSimpleClassName(className)
-        };
-    }
-
-    public String getReturnType() {
-        return NameUtils.calcInternalName(Type.getReturnType(desc).getClassName());
+        return new String[]{Modifier.toString(access), NameUtils.calcSimpleClassName(className)};
     }
 
     @Override
