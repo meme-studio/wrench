@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
+import static io.meme.toolbox.wrench.utils.Functions.*;
 import static io.vavr.API.$;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.is;
@@ -88,7 +89,7 @@ public final class $ {
     @SneakyThrows
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
-                                             .filter(PredicateEx.of(Function($::matchLimited).apply(ignoreVisibilities)))
+                                             .filter(predicate(Function($::matchLimited).apply(ignoreVisibilities)))
                                              .map(Function($::getClassMessage).apply(ignoreVisibilities))
                                              .getOrNull();
     }

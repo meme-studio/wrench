@@ -2,10 +2,10 @@ package io.meme.toolbox.wrench.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 
 /**
@@ -15,29 +15,26 @@ import java.util.regex.Matcher;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NameUtils {
 
-    public static String calcSimpleClassName(String longClassName) {
-        return Objects.requireNonNull(longClassName)
-                      .substring(longClassName.lastIndexOf(".") + 1);
+    public static String calcSimpleClassName(@NonNull String className) {
+        return className.substring(className.lastIndexOf(".") + 1);
     }
 
-    public static String calcPackageName(String longClassName) {
-        return Objects.requireNonNull(longClassName)
-                      .substring(0, longClassName.lastIndexOf("."));
+    public static String calcPackageName(@NonNull String className) {
+        return className.substring(0, className.lastIndexOf("."));
     }
 
     //FIXME
-    public static String calcInternalName(String name) {
-        return Objects.requireNonNull(name)
-                      .replace('/', '.')
-                      .replace('\\', '.')
-                      .replaceAll("(\\${2})+", Matcher.quoteReplacement("$."));
+    public static String calcInternalName(@NonNull String name) {
+        return name.replace('/', '.')
+                   .replace('\\', '.')
+                   .replaceAll("(\\${2})+", Matcher.quoteReplacement("$."));
     }
 
-    public static String[] calcInternalNames(List<String> names) {
+    public static String[] calcInternalNames(@NonNull List<String> names) {
         return calcInternalNames(names.toArray(new String[0]));
     }
 
-    public static String[] calcInternalNames(String... names) {
+    public static String[] calcInternalNames(@NonNull String... names) {
         return Arrays.stream(names)
                      .map(NameUtils::calcInternalName)
                      .toArray(String[]::new);

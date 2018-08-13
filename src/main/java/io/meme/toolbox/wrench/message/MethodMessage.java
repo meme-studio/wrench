@@ -3,7 +3,7 @@ package io.meme.toolbox.wrench.message;
 import io.meme.toolbox.wrench.message.resolver.MethodResolver;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
-import io.meme.toolbox.wrench.utils.PredicateEx;
+import io.meme.toolbox.wrench.utils.Functions;
 import io.vavr.Function2;
 import jdk.internal.org.objectweb.asm.Label;
 import jdk.internal.org.objectweb.asm.Type;
@@ -112,9 +112,9 @@ public class MethodMessage extends MethodResolver implements Serializable {
     @Override
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
         argumentMessages.stream()
-                        .filter(PredicateEx.of(Function2.of(Objects::equals)
-                                                        .apply(index)
-                                                        .compose(ArgumentMessage::getIndex)))
+                        .filter(Functions.predicate(Function2.of(Objects::equals)
+                                                             .apply(index)
+                                                             .compose(ArgumentMessage::getIndex)))
                         .findAny()
                         .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
     }

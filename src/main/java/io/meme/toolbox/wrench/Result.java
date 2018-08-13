@@ -2,21 +2,20 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
-import io.meme.toolbox.wrench.utils.PredicateEx;
-import io.vavr.Function1;
 import io.vavr.Function2;
-import io.vavr.Predicates;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.function.Function.identity;
+import static io.meme.toolbox.wrench.utils.Functions.*;
+import static io.vavr.Predicates.*;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -55,15 +54,14 @@ public class Result {
 
     private <T> Result by(T[] conditions, Function<ClassMessage, T> function) {
         return classMessages.stream()
-                            .filter(PredicateEx.of(PredicateEx.toFunction(Predicates.isIn(conditions))
-                                                              .compose(function)))
+                            .filter(predicate(function(isIn(conditions)).compose(function)))
                             .collect($.toResult());
     }
 
     private List<ClassMessage> byTypes(List<String> types) {
         return classMessages.stream()
-                            .filter(PredicateEx.of(Function2.of(this::isMatchTypes).apply(types)))
-                            .collect(collectingAndThen(Collectors.toList(), Function2.<List<String>, List<ClassMessage>, List<ClassMessage>>of(this::byTypes).apply(types)));
+                            .filter(predicate(Function2.of(this::isMatchTypes).apply(types)))
+                            .collect(collectingAndThen(toList(), Function2.<List<String>, List<ClassMessage>, List<ClassMessage>>of(this::byTypes).apply(types)));
     }
 
     private List<ClassMessage> byTypes(List<String> types, List<ClassMessage> classMessages) {
@@ -73,12 +71,12 @@ public class Result {
     private List<String> listClassNames(List<ClassMessage> classMessages) {
         return classMessages.stream()
                             .map(ClassMessage::getName)
-                            .collect(Collectors.toList());
+                            .collect(toList());
     }
 
     private boolean isMatchTypes(List<String> classNames, ClassMessage classMessage) {
         return Stream.concat(classMessage.getInterfaceNames().stream(), Stream.of(classMessage.getSuperClassName(), classMessage.getName()))
-                     .anyMatch(Predicates.isIn(classNames.toArray()));
+                     .anyMatch(isIn(classNames.toArray()));
     }
 
 
