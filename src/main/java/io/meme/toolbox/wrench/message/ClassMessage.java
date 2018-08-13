@@ -11,10 +11,7 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Type;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.experimental.ExtensionMethod;
 
 import java.io.Serializable;
@@ -108,7 +105,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
     }
 
     private FieldMessage calcFieldMessage(String name, String desc, int access) {
-        FieldMessage field = FieldMessage.of(name, desc, access);
+        FieldMessage field = FieldMessage.of(name, NameUtils.calcInternalName(Type.getType(desc).getClassName()), access);
         fieldMessages.add(field);
         return field;
     }
@@ -128,7 +125,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     private MethodMessage calcMethodMessage(String name, String desc, int access) {
         List<ArgumentMessage> argumentMessages = calcArgumentMessages(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
-        MethodMessage method = MethodMessage.of(this.name, name, NameUtils.calcInternalName(Type.getReturnType(desc).getClassName()), access, argumentMessages);
+        MethodMessage method = MethodMessage.of(getName(), name, NameUtils.calcInternalName(Type.getReturnType(desc).getClassName()), access, argumentMessages);
         methodMessages.add(method);
         return method;
     }
@@ -157,5 +154,9 @@ public class ClassMessage extends ClassResolver implements Serializable {
         return $.isWideType(paramTypes[i]) ? preIndex + 2 : preIndex + 1;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
 

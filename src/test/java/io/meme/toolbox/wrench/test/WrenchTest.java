@@ -16,7 +16,8 @@ class WrenchTest {
     void ignoreMethodVisibility() {
         Result result = Wrench.wrench()
                               .ignoreMethodVisibility()
-                              .includePackages("io.meme.toolbox.wrench").scan();
+                              .includePackages("io.meme.toolbox.wrench")
+                              .scan();
         System.out.println();
     }
 
@@ -26,15 +27,27 @@ class WrenchTest {
 
     @Test
     void ignoreFieldVisibility() {
+        Result result = Wrench.wrench()
+                              .ignoreFieldVisibility()
+                              .includePackages("io.meme.toolbox.wrench")
+                              .scan();
+        System.out.println();
     }
 
     @Test
     void ignoreVisibilities() {
+        Result result = Wrench.wrench()
+                              .includePackages("io.meme.toolbox.wrench")
+                              .ignoreVisibilities()
+                              .scan();
+        System.out.println();
     }
 
     @Test
     void includePackages() {
-        Result result = Wrench.wrench().includePackages("io.meme.toolbox.wrench").scan();
+        Result result = Wrench.wrench()
+                              .includePackages("io.meme.toolbox.wrench")
+                              .scan();
         System.out.println();
     }
 

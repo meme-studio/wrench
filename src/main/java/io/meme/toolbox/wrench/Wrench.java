@@ -24,6 +24,7 @@ import static io.meme.toolbox.wrench.utils.Functions.negate;
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
 import static io.vavr.API.unchecked;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
@@ -37,7 +38,7 @@ import static java.util.stream.Collectors.*;
 public final class Wrench {
 
     private int ignoreVisibilities = $.INVISIBLE;
-    private List<String> includePackages = Collections.singletonList("");
+    private List<String> includePackages = singletonList("");
     private List<String> excludePackages = emptyList();
 
     public static Result scanDirectly() {

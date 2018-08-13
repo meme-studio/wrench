@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 
 /**
  * @author meme
@@ -18,7 +19,6 @@ import java.io.Serializable;
 public class FieldMessage extends FieldResolver implements Serializable {
     private static final long serialVersionUID = 2648987017868206269L;
     @Getter
-    @EqualsAndHashCode.Include
     private final String name;
     @Getter
     private final String typeName;
@@ -44,5 +44,9 @@ public class FieldMessage extends FieldResolver implements Serializable {
         return NameUtils.calcSimpleClassName(typeName);
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", Modifier.toString(access), typeName, name);
+    }
 }
 

@@ -65,7 +65,6 @@ public class MethodMessage extends MethodResolver implements Serializable {
         return AccessUtils.isSynchronized(access);
     }
 
-    @EqualsAndHashCode.Include
     @Override
     public String toString() {
         return isClinit() ? "static {}" : getNonStaticMethodDescription();
@@ -89,7 +88,7 @@ public class MethodMessage extends MethodResolver implements Serializable {
     }
 
     private String[] nonConstructorPrefixes() {
-        return new String[]{Modifier.toString(access), getReturnType(), name};
+        return new String[]{Modifier.toString(access), returnType, name};
     }
 
     private String[] constructorPrefixes() {
