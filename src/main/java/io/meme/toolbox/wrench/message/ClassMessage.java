@@ -56,7 +56,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @SneakyThrows
     public static ClassMessage of(String className) {
-        return $.getClassMessage($.IGNORE_VISIBILITIES, new ClassReader(className));
+        return $.getClassMessage($.INCLUDE_ALL_INVISIBLE, new ClassReader(className));
     }
 
     public boolean isFinal() {

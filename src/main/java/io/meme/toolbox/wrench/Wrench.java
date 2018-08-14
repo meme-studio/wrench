@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.Functions.negate;
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
+import static io.vavr.API.Function;
 import static io.vavr.API.unchecked;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.*;
 @NoArgsConstructor(staticName = "wrench")
 public final class Wrench {
 
-    private int ignoreVisibilities = $.INVISIBLE;
+    private int visible = $.INVISIBLE;
     private List<String> includePackages = singletonList("");
     private List<String> excludePackages = emptyList();
 
@@ -51,20 +52,20 @@ public final class Wrench {
         return wrench().scan();
     }
 
-    public Wrench ignoreMethodVisibility() {
-        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_METHOD_VISIBILITY);
+    public Wrench includeInvisibleMethod() {
+        return visible(visible | $.INCLUDE_INVISIBLE_METHOD);
     }
 
-    public Wrench ignoreClassVisibility() {
-        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_CLASS_VISIBILITY);
+    public Wrench includeInvisibleClass() {
+        return visible(visible | $.INCLUDE_INVISIBLE_CLASS);
     }
 
-    public Wrench ignoreFieldVisibility() {
-        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_FIELD_VISIBILITY);
+    public Wrench includeInvisibleField() {
+        return visible(visible | $.INCLUDE_INVISIBLE_FIELD);
     }
 
-    public Wrench ignoreVisibilities() {
-        return ignoreVisibilities(ignoreVisibilities | $.IGNORE_VISIBILITIES);
+    public Wrench includeAllInvisible() {
+        return visible(visible | $.INCLUDE_ALL_INVISIBLE);
     }
 
     @Tolerate
@@ -104,12 +105,12 @@ public final class Wrench {
 
     private Stream<ClassMessage> scanClassType(List<String> paths) {
         return paths.stream()
-                    .filter(negate($::isAnonymousClass))
-                    .filter(predicate(API.Function($::matchPackages).apply(includePackages)))
-                    .filter(negate(API.Function($::matchPackages).apply(excludePackages)))
+                    .filter(negate($::isAnonymousClass)
+                            .and(predicate(Function($::matchPackages).apply(includePackages)))
+                            .and(negate(Function($::matchPackages).apply(excludePackages))))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map(API.Function($::determineClassMessage).apply(ignoreVisibilities));
+                    .map(Function($::determineClassMessage).apply(visible));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -126,12 +127,12 @@ public final class Wrench {
 
     private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
         return entry.getValue()
-                    .filter(predicate(API.Function($::isClassFileType).compose(JarEntry::getName)))
-                    .filter(negate(API.Function($::isAnonymousClass).compose(JarEntry::getName)))
-                    .filter(predicate(API.Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
-                    .filter(negate(API.Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName)))
-                    .map(API.Function($::getClassInputStream).apply(entry))
-                    .map(API.Function($::determineClassMessage).apply(ignoreVisibilities));
+                    .filter(predicate(Function($::isClassFileType).compose(JarEntry::getName))
+                            .and(negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
+                            .and(predicate(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
+                            .and(negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName))))
+                    .map(Function($::getClassInputStream).apply(entry))
+                    .map(Function($::determineClassMessage).apply(visible));
     }
 
 }

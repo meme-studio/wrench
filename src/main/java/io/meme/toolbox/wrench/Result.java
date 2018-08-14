@@ -15,8 +15,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.Functions.*;
-import static io.vavr.Predicates.isIn;
+import static io.vavr.Predicates.*;
 import static java.util.stream.Collectors.*;
+
 
 /**
  * @author meme

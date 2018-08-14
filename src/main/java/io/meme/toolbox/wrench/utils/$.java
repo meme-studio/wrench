@@ -2,7 +2,6 @@ package io.meme.toolbox.wrench.utils;
 
 import io.meme.toolbox.wrench.Result;
 import io.meme.toolbox.wrench.message.ClassMessage;
-import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.Type;
 import lombok.*;
@@ -15,17 +14,13 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
 import static io.meme.toolbox.wrench.utils.Functions.*;
-import static io.vavr.API.$;
 import static io.vavr.API.*;
-import static io.vavr.Predicates.is;
-import static io.vavr.Predicates.isIn;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static io.vavr.Predicates.*;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author meme
@@ -41,18 +36,17 @@ public final class $ {
         private String suffixName;
     }
 
-    @NonNull
     public static final String[] CLASSPATHS = System.getProperty("java.class.path").split(File.pathSeparator);
 
     public static final int INVISIBLE = 0;
 
-    public static final int IGNORE_CLASS_VISIBILITY = 1;
+    public static final int INCLUDE_INVISIBLE_CLASS = 1;
 
-    public static final int IGNORE_FIELD_VISIBILITY = 2;
+    public static final int INCLUDE_INVISIBLE_FIELD = 2;
 
-    public static final int IGNORE_METHOD_VISIBILITY = 4;
+    public static final int INCLUDE_INVISIBLE_METHOD = 4;
 
-    public static final int IGNORE_VISIBILITIES = IGNORE_CLASS_VISIBILITY | IGNORE_FIELD_VISIBILITY | IGNORE_METHOD_VISIBILITY;
+    public static final int INCLUDE_ALL_INVISIBLE = INCLUDE_INVISIBLE_CLASS | INCLUDE_INVISIBLE_FIELD | INCLUDE_INVISIBLE_METHOD;
 
     public static boolean isClassFileType(String path) {
         return isJarType(path) || isClassType(path);
@@ -76,9 +70,9 @@ public final class $ {
 
     public static ClassFileType determineClassFileType(String path) {
         return Match(getSuffixName(path)).of(
-                API.Case(API.$(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
-                API.Case(API.$(is(CLASS.getSuffixName())), CLASS),
-                API.Case($(), () -> Asserts.fail("class file type"))
+                Case($(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
+                Case($(is(CLASS.getSuffixName())), CLASS),
+                Case($(), () -> Asserts.fail("class file type"))
         );
     }
 
@@ -87,7 +81,7 @@ public final class $ {
         return entry.getKey().getInputStream(jarEntry);
     }
 
-    @SneakyThrows
+
     public static ClassMessage determineClassMessage(int ignoreVisibilities, InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
                                              .filter(predicate(Function($::matchLimited).apply(ignoreVisibilities)))
@@ -116,7 +110,7 @@ public final class $ {
     public static List<String> listClassNames(Class<?>... className) {
         return Stream.of(className)
                      .map(Class::getName)
-                     .collect(Collectors.toList());
+                     .collect(toList());
     }
 
     public static Collector<ClassMessage, ?, Result> toResult() {
@@ -125,16 +119,16 @@ public final class $ {
 
 
     public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
-        return (IGNORE_CLASS_VISIBILITY & ignoreVisibilities) > 0;
+        return (INCLUDE_INVISIBLE_CLASS & ignoreVisibilities) > 0;
     }
 
     public static boolean isFieldVisibilityIgnored(int ignoreVisibilities) {
-        return (IGNORE_FIELD_VISIBILITY & ignoreVisibilities) > 0;
+        return (INCLUDE_INVISIBLE_FIELD & ignoreVisibilities) > 0;
     }
 
 
     public static boolean isMethodVisibilityIgnored(int ignoreVisibilities) {
-        return (IGNORE_METHOD_VISIBILITY & ignoreVisibilities) > 0;
+        return (INCLUDE_INVISIBLE_METHOD & ignoreVisibilities) > 0;
     }
 
 
