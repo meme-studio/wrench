@@ -40,13 +40,13 @@ public final class $ {
 
     public static final int INVISIBLE = 0;
 
-    public static final int INCLUDE_INVISIBLE_CLASS = 1;
+    public static final int INVISIBLE_CLASS = 1;
 
-    public static final int INCLUDE_INVISIBLE_FIELD = 2;
+    public static final int INVISIBLE_FIELD = 2;
 
-    public static final int INCLUDE_INVISIBLE_METHOD = 4;
+    public static final int INVISIBLE_METHOD = 4;
 
-    public static final int INCLUDE_ALL_INVISIBLE = INCLUDE_INVISIBLE_CLASS | INCLUDE_INVISIBLE_FIELD | INCLUDE_INVISIBLE_METHOD;
+    public static final int VISIBLE = INVISIBLE_CLASS | INVISIBLE_FIELD | INVISIBLE_METHOD;
 
     public static boolean isClassFileType(String path) {
         return isJarType(path) || isClassType(path);
@@ -118,17 +118,17 @@ public final class $ {
     }
 
 
-    public static boolean isClassVisibilityIgnored(int ignoreVisibilities) {
-        return (INCLUDE_INVISIBLE_CLASS & ignoreVisibilities) > 0;
+    public static boolean isClassVisibilityIgnored(int visibility) {
+        return (INVISIBLE_CLASS & visibility) > 0;
     }
 
-    public static boolean isFieldVisibilityIgnored(int ignoreVisibilities) {
-        return (INCLUDE_INVISIBLE_FIELD & ignoreVisibilities) > 0;
+    public static boolean isEnableVisibleField(int visibility) {
+        return (INVISIBLE_FIELD & visibility) > 0;
     }
 
 
-    public static boolean isMethodVisibilityIgnored(int ignoreVisibilities) {
-        return (INCLUDE_INVISIBLE_METHOD & ignoreVisibilities) > 0;
+    public static boolean isEnableVisibleMethod(int visibility) {
+        return (INVISIBLE_METHOD & visibility) > 0;
     }
 
 

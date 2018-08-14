@@ -47,7 +47,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
     @Getter
     private List<FieldMessage> fieldMessages = new ArrayList<>();
 
-    private final int ignoreVisibilities;
+    private final int visibility;
 
     //FIXME for array type
     public static ClassMessage of(Class<?> clazz) {
@@ -56,7 +56,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @SneakyThrows
     public static ClassMessage of(String className) {
-        return $.getClassMessage($.INCLUDE_ALL_INVISIBLE, new ClassReader(className));
+        return $.getClassMessage($.VISIBLE, new ClassReader(className));
     }
 
     public boolean isFinal() {
@@ -101,7 +101,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> $.isFieldVisibilityIgnored(ignoreVisibilities));
+        return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> $.isEnableVisibleField(visibility));
     }
 
     private FieldMessage calcFieldMessage(String name, String desc, int access) {
@@ -112,7 +112,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return visitAndReturn(access, name, desc, this::calcMethodMessage, ignore -> $.isMethodVisibilityIgnored(ignoreVisibilities));
+        return visitAndReturn(access, name, desc, this::calcMethodMessage, ignore -> $.isEnableVisibleMethod(visibility));
     }
 
     private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator, Predicate<Integer> isAccessIgnore) {

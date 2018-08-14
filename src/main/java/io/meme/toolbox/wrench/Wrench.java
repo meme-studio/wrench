@@ -53,19 +53,19 @@ public final class Wrench {
     }
 
     public Wrench includeInvisibleMethod() {
-        return visibility(visibility | $.INCLUDE_INVISIBLE_METHOD);
+        return visibility(visibility | $.INVISIBLE_METHOD);
     }
 
     public Wrench includeInvisibleClass() {
-        return visibility(visibility | $.INCLUDE_INVISIBLE_CLASS);
+        return visibility(visibility | $.INVISIBLE_CLASS);
     }
 
     public Wrench includeInvisibleField() {
-        return visibility(visibility | $.INCLUDE_INVISIBLE_FIELD);
+        return visibility(visibility | $.INVISIBLE_FIELD);
     }
 
     public Wrench includeAllInvisible() {
-        return visibility(visibility | $.INCLUDE_ALL_INVISIBLE);
+        return visibility(visibility | $.VISIBLE);
     }
 
     @Tolerate
