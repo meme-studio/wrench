@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.*;
 @NoArgsConstructor(staticName = "wrench")
 public final class Wrench {
 
-    private int visible = $.INVISIBLE;
+    private int visibility = $.INVISIBLE;
     private List<String> includePackages = singletonList("");
     private List<String> excludePackages = emptyList();
 
@@ -53,19 +53,19 @@ public final class Wrench {
     }
 
     public Wrench includeInvisibleMethod() {
-        return visible(visible | $.INCLUDE_INVISIBLE_METHOD);
+        return visibility(visibility | $.INCLUDE_INVISIBLE_METHOD);
     }
 
     public Wrench includeInvisibleClass() {
-        return visible(visible | $.INCLUDE_INVISIBLE_CLASS);
+        return visibility(visibility | $.INCLUDE_INVISIBLE_CLASS);
     }
 
     public Wrench includeInvisibleField() {
-        return visible(visible | $.INCLUDE_INVISIBLE_FIELD);
+        return visibility(visibility | $.INCLUDE_INVISIBLE_FIELD);
     }
 
     public Wrench includeAllInvisible() {
-        return visible(visible | $.INCLUDE_ALL_INVISIBLE);
+        return visibility(visibility | $.INCLUDE_ALL_INVISIBLE);
     }
 
     @Tolerate
@@ -110,7 +110,7 @@ public final class Wrench {
                             .and(negate(Function($::matchPackages).apply(excludePackages))))
                     .map(API.<String, File>unchecked(File::new))
                     .map(unchecked(FileInputStream::new))
-                    .map(Function($::determineClassMessage).apply(visible));
+                    .map(Function($::determineClassMessage).apply(visibility));
     }
 
     private Stream<ClassMessage> scanJarType(List<String> paths) {
@@ -132,7 +132,7 @@ public final class Wrench {
                             .and(predicate(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
                             .and(negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName))))
                     .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(visible));
+                    .map(Function($::determineClassMessage).apply(visibility));
     }
 
 }
