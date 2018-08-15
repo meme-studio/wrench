@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,11 +17,11 @@ import java.util.jar.JarFile;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
-import static io.meme.toolbox.wrench.utils.Functions.*;
-import static io.vavr.API.*;
-import static io.vavr.Predicates.*;
-import static java.util.stream.Collectors.*;
+import static io.meme.toolbox.wrench.utils.Functions.predicate;
+import static io.vavr.API.Function;
+import static io.vavr.API.Try;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author meme
@@ -32,8 +33,14 @@ public final class $ {
     @AllArgsConstructor
     @Getter
     public enum ClassFileType {
-        JAR(".jar"), WAR(".war"), CLASS(".class");
+        CLASS(".class"), EAR(".ear"), JAR(".jar"), WAR(".war");
         private String suffixName;
+
+        public static ClassFileType getClassFileType(String suffixName) {
+            return Arrays.stream(values())
+                         .filter(predicate(Function(Objects::equals).apply(suffixName).compose(ClassFileType::getSuffixName)))
+                         .findAny().orElseThrow(() -> Asserts.fail("class file type"));
+        }
     }
 
     public static final String[] CLASSPATHS = System.getProperty("java.class.path").split(File.pathSeparator);
@@ -49,15 +56,9 @@ public final class $ {
     public static final int VISIBLE = INVISIBLE_CLASS | INVISIBLE_FIELD | INVISIBLE_METHOD;
 
     public static boolean isClassFileType(String path) {
-        return isJarType(path) || isClassType(path);
-    }
-
-    public static boolean isClassType(String path) {
-        return path.endsWith(CLASS.getSuffixName());
-    }
-
-    public static boolean isJarType(String path) {
-        return path.endsWith(JAR.getSuffixName());
+        return Arrays.stream(ClassFileType.values())
+                     .map(ClassFileType::getSuffixName)
+                     .anyMatch(path::endsWith);
     }
 
     public static String getSuffixName(String path) {
@@ -66,14 +67,6 @@ public final class $ {
 
     public static boolean isAnonymousClass(String path) {
         return path.matches("^.*[$]\\d+.*$");
-    }
-
-    public static ClassFileType determineClassFileType(String path) {
-        return Match(getSuffixName(path)).of(
-                Case($(isIn(JAR.getSuffixName(), WAR.getSuffixName())), JAR),
-                Case($(is(CLASS.getSuffixName())), CLASS),
-                Case($(), () -> Asserts.fail("class file type"))
-        );
     }
 
     @SneakyThrows

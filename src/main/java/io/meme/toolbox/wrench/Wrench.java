@@ -2,6 +2,7 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.utils.$;
+import io.meme.toolbox.wrench.utils.Asserts;
 import io.vavr.API;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -15,15 +16,20 @@ import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
+import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
 import static io.meme.toolbox.wrench.utils.Functions.negate;
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
-import static io.vavr.API.Function;
-import static io.vavr.API.unchecked;
+import static io.vavr.API.*;
+import static io.vavr.Predicates.is;
+import static io.vavr.Predicates.isIn;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
@@ -46,7 +52,7 @@ public final class Wrench {
     private List<String> excludePackages = emptyList();
 
     /**
-     *  对java.class.path下所有类进行扫描，只包含公开的类，成员变量与成员方法。
+     * 对java.class.path下所有类进行扫描，只包含公开的类，成员变量与成员方法。
      */
     public static Result scanDirectly() {
         return wrench().scan();
@@ -92,15 +98,21 @@ public final class Wrench {
                     .parallel()
                     .map(Path::toString)
                     .filter($::isClassFileType)
-                    .collect(collectingAndThen(groupingBy($::determineClassFileType), this::scan));
+                    .collect(collectingAndThen(groupingBy(Function($.ClassFileType::getClassFileType).compose($::getSuffixName)), this::scan));
     }
 
-
-    private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> pathGroup) {
-        return Stream.concat(
-                scanJarType(pathGroup.getOrDefault($.ClassFileType.JAR, emptyList())),
-                scanClassType(pathGroup.getOrDefault($.ClassFileType.CLASS, emptyList()))
+    public Stream<ClassMessage> scan(Map.Entry<$.ClassFileType, List<String>> type) {
+        return Match(type.getKey()).of(
+                Case($(isIn(JAR, WAR, EAR)), () -> scanJarType(type.getValue())),
+                Case($(is(CLASS)), () -> scanClassType(type.getValue())),
+                Case($(), () -> Asserts.fail("class file type"))
         );
+    }
+
+    private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> types) {
+        return types.entrySet()
+                    .parallelStream()
+                    .flatMap(this::scan);
     }
 
     private Stream<ClassMessage> scanClassType(List<String> paths) {
