@@ -1,7 +1,7 @@
 package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.Configuration;
-import io.meme.toolbox.wrench.message.resolver.ClassResolver;
+import io.meme.toolbox.wrench.message.visitor.Asm5ClassVisitor;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
@@ -12,7 +12,10 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Type;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.ExtensionMethod;
 
 import java.io.Serializable;
@@ -31,7 +34,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ExtensionMethod({AccessUtils.class, Arrays.class})
-public class ClassMessage extends ClassResolver implements Serializable {
+public class ClassMessage extends Asm5ClassVisitor implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
 
     @EqualsAndHashCode.Include

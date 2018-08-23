@@ -3,9 +3,9 @@ package io.meme.toolbox.wrench;
 import io.meme.toolbox.wrench.classpath.ClassPathProvider;
 import io.meme.toolbox.wrench.classpath.DefaultClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
-import io.meme.toolbox.wrench.resolver.ClassClassFileTypeResolver;
-import io.meme.toolbox.wrench.resolver.ClassFileTypeResolver;
-import io.meme.toolbox.wrench.resolver.JarClassFileTypeResolver;
+import io.meme.toolbox.wrench.resolver.ClassResolver;
+import io.meme.toolbox.wrench.resolver.ClassTypeResolver;
+import io.meme.toolbox.wrench.resolver.JarResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.vavr.API;
 import lombok.NoArgsConstructor;
@@ -30,7 +30,7 @@ import static io.vavr.API.Function;
 public final class Wrench {
 
     private Configuration configuration = Configuration.preset();
-    private List<ClassFileTypeResolver> resolvers = Arrays.asList(new ClassClassFileTypeResolver(), new JarClassFileTypeResolver());
+    private List<ClassTypeResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
     private List<ClassPathProvider> providers = Collections.singletonList(new DefaultClassPathProvider());
 
     /**
@@ -61,13 +61,13 @@ public final class Wrench {
     }
 
     public Wrench includePackages(String... packageNames) {
-        configuration.setIncludePackages(Arrays.asList(packageNames));
+        configuration.setInclusionPackages(Arrays.asList(packageNames));
         return this;
     }
 
 
     public Wrench excludePackages(String... packageNames) {
-        configuration.setExcludePackages(Arrays.asList(packageNames));
+        configuration.setExclusionPackages(Arrays.asList(packageNames));
         return this;
     }
 
@@ -87,10 +87,10 @@ public final class Wrench {
 
     private Stream<ClassMessage> calcClassMessage(String path) {
         return resolvers.stream()
-                        .filter(predicate(Function(ClassFileTypeResolver::isTypeMatch).reversed()
-                                                                                      .apply(path)))
-                        .flatMap(Function(ClassFileTypeResolver::scan).reversed()
-                                                                      .apply(configuration, path));
+                        .filter(predicate(Function(ClassTypeResolver::isTypeMatched).reversed()
+                                                                                    .apply(path)))
+                        .flatMap(Function(ClassTypeResolver::resolve).reversed()
+                                                                     .apply(configuration, path));
     }
 
 }

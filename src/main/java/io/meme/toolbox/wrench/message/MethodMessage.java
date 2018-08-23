@@ -1,6 +1,6 @@
 package io.meme.toolbox.wrench.message;
 
-import io.meme.toolbox.wrench.message.resolver.MethodResolver;
+import io.meme.toolbox.wrench.message.visitor.Asm5MethodVisitor;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.Functions;
 import io.meme.toolbox.wrench.utils.NameUtils;
@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.joining;
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class MethodMessage extends MethodResolver implements Serializable {
+public class MethodMessage extends Asm5MethodVisitor implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
     @Getter
     private final String className;

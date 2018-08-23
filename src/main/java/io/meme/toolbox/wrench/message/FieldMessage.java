@@ -1,6 +1,6 @@
 package io.meme.toolbox.wrench.message;
 
-import io.meme.toolbox.wrench.message.resolver.FieldResolver;
+import io.meme.toolbox.wrench.message.visitor.Asm5FieldVisitor;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.lang.reflect.Modifier;
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class FieldMessage extends FieldResolver implements Serializable {
+public class FieldMessage extends Asm5FieldVisitor implements Serializable {
     private static final long serialVersionUID = 2648987017868206269L;
     @Getter
     private final String name;

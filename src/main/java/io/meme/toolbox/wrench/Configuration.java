@@ -29,8 +29,8 @@ public class Configuration {
     public static final int VISIBLE = INVISIBLE_CLASS | INVISIBLE_FIELD | INVISIBLE_METHOD;
 
     private int visibility = INVISIBLE;
-    private List<String> includePackages = singletonList("");
-    private List<String> excludePackages = emptyList();
+    private List<String> inclusionPackages = singletonList("");
+    private List<String> exclusionPackages = emptyList();
 
     public void includeInvisibleMethod() {
         visibility |= INVISIBLE_METHOD;
@@ -58,6 +58,18 @@ public class Configuration {
 
     public boolean isEnableVisibleMethod() {
         return (INVISIBLE_METHOD & visibility) > 0;
+    }
+
+    public boolean isPackageIncluded(String packageName) {
+        return matchesPackages(inclusionPackages, packageName);
+    }
+
+    public boolean isPackageExcluded(String packageName) {
+        return matchesPackages(exclusionPackages, packageName);
+    }
+
+    private boolean matchesPackages(List<String> packages, String packageName) {
+        return packages.stream().anyMatch(packageName::contains);
     }
 
 

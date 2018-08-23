@@ -27,6 +27,6 @@ public class ArgumentMessage implements Serializable {
 
     //TODO
     public boolean isFinal() {
-        return false;
+        throw new UnsupportedOperationException();
     }
 }

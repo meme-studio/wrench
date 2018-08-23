@@ -1,14 +1,14 @@
-package io.meme.toolbox.wrench.message.resolver;
+package io.meme.toolbox.wrench.message.visitor;
 
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
 
 /**
  * @author meme
- * @since 2018/7/30
+ * @since 1.0
  */
-public abstract class MethodResolver extends MethodVisitor {
-    protected MethodResolver() {
+public abstract class Asm5MethodVisitor extends MethodVisitor {
+    protected Asm5MethodVisitor() {
         super(Opcodes.ASM5);
     }
 }

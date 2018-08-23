@@ -9,11 +9,10 @@ import java.util.stream.Stream;
  * @author meme
  * @since 1.0
  */
-public interface ClassFileTypeResolver {
+public interface ClassTypeResolver {
 
-   Stream<ClassMessage> scan(String path, Configuration configuration);
+    Stream<ClassMessage> resolve(String path, Configuration configuration);
 
-    boolean isTypeMatch(String path);
-
+    boolean isTypeMatched(String path);
 
 }

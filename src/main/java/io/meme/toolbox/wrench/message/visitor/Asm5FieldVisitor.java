@@ -1,14 +1,14 @@
-package io.meme.toolbox.wrench.message.resolver;
+package io.meme.toolbox.wrench.message.visitor;
 
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
 
 /**
  * @author meme
- * @since 2018/7/30
+ * @since 1.0
  */
-public abstract class FieldResolver extends FieldVisitor {
-    protected FieldResolver() {
+public abstract class Asm5FieldVisitor extends FieldVisitor {
+    protected Asm5FieldVisitor() {
         super(Opcodes.ASM5);
     }
 }
