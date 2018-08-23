@@ -1,39 +1,23 @@
 package io.meme.toolbox.wrench;
 
+import io.meme.toolbox.wrench.classpath.ClassPathProvider;
+import io.meme.toolbox.wrench.classpath.DefaultClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.resolver.ClassClassFileTypeResolver;
+import io.meme.toolbox.wrench.resolver.ClassFileTypeResolver;
+import io.meme.toolbox.wrench.resolver.JarClassFileTypeResolver;
 import io.meme.toolbox.wrench.utils.$;
-import io.meme.toolbox.wrench.utils.Asserts;
 import io.vavr.API;
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
-import lombok.experimental.Tolerate;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static io.meme.toolbox.wrench.utils.$.ClassFileType.*;
-import static io.meme.toolbox.wrench.utils.Functions.negate;
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
-import static io.vavr.API.*;
-import static io.vavr.Predicates.is;
-import static io.vavr.Predicates.isIn;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.*;
+import static io.vavr.API.Function;
 
 /**
  * Wrench是一个基于ow2 asm驱动的类扫描与解析工具。
@@ -42,109 +26,71 @@ import static java.util.stream.Collectors.*;
  * @author meme
  * @since 1.0
  */
-@Accessors(fluent = true)
-@Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(staticName = "wrench")
 public final class Wrench {
 
-    private int visibility = $.INVISIBLE;
-    private List<String> includePackages = singletonList("");
-    private List<String> excludePackages = emptyList();
+    private Configuration configuration = Configuration.preset();
+    private List<ClassFileTypeResolver> resolvers = Arrays.asList(new ClassClassFileTypeResolver(), new JarClassFileTypeResolver());
+    private List<ClassPathProvider> providers = Collections.singletonList(new DefaultClassPathProvider());
 
     /**
-     * 对java.class.path下所有类进行扫描，只包含公开的类，成员变量与成员方法。
+     * 只包含公开的类，成员变量与成员方法。
      */
     public static Result scanDirectly() {
         return wrench().scan();
     }
 
     public Wrench includeInvisibleMethod() {
-        return visibility(visibility | $.INVISIBLE_METHOD);
+        configuration.includeInvisibleMethod();
+        return this;
     }
 
     public Wrench includeInvisibleClass() {
-        return visibility(visibility | $.INVISIBLE_CLASS);
+        configuration.includeInvisibleClass();
+        return this;
     }
 
     public Wrench includeInvisibleField() {
-        return visibility(visibility | $.INVISIBLE_FIELD);
+        configuration.includeInvisibleField();
+        return this;
     }
 
-    public Wrench includeAllInvisible() {
-        return visibility(visibility | $.VISIBLE);
+    public Wrench visible() {
+        configuration.visible();
+        return this;
     }
 
-    @Tolerate
     public Wrench includePackages(String... packageNames) {
-        return includePackages(Arrays.asList(packageNames));
+        configuration.setIncludePackages(Arrays.asList(packageNames));
+        return this;
     }
 
-    @Tolerate
+
     public Wrench excludePackages(String... packageNames) {
-        return excludePackages(Arrays.asList(packageNames));
+        configuration.setExcludePackages(Arrays.asList(packageNames));
+        return this;
     }
 
     public Result scan() {
-        return Stream.of($.CLASSPATHS)
-                     .flatMap(this::scan)
-                     .filter(Objects::nonNull)
-                     .distinct()
-                     .collect($.toResult());
+        return providers.stream()
+                        .map(ClassPathProvider::listClassPaths)
+                        .flatMap(Collection::stream)
+                        .map(Paths::get)
+                        .flatMap(API.<Path, Stream<Path>>unchecked(Files::walk))
+                        .parallel()
+                        .map(Path::toString)
+                        .flatMap(this::calcClassMessage)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .collect($.toResult());
     }
 
-    @SneakyThrows
-    private Stream<ClassMessage> scan(String path) {
-        return Files.walk(Paths.get(path))
-                    .parallel()
-                    .map(Path::toString)
-                    .filter($::isClassFileType)
-                    .collect(collectingAndThen(groupingBy(Function($.ClassFileType::getClassFileType).compose($::getSuffixName)), this::scan));
-    }
-
-    public Stream<ClassMessage> scan(Map.Entry<$.ClassFileType, List<String>> type) {
-        return Match(type.getKey()).of(
-                Case($(isIn(JAR, WAR, EAR)), () -> scanJarType(type.getValue())),
-                Case($(is(CLASS)), () -> scanClassType(type.getValue())),
-                Case($(), () -> Asserts.fail("class file type"))
-        );
-    }
-
-    private Stream<ClassMessage> scan(Map<$.ClassFileType, List<String>> types) {
-        return types.entrySet()
-                    .parallelStream()
-                    .flatMap(this::scan);
-    }
-
-    private Stream<ClassMessage> scanClassType(List<String> paths) {
-        return paths.stream()
-                    .filter(negate($::isAnonymousClass)
-                            .and(predicate(Function($::matchPackages).apply(includePackages)))
-                            .and(negate(Function($::matchPackages).apply(excludePackages))))
-                    .map(API.<String, File>unchecked(File::new))
-                    .map(unchecked(FileInputStream::new))
-                    .map(Function($::determineClassMessage).apply(visibility));
-    }
-
-    private Stream<ClassMessage> scanJarType(List<String> paths) {
-        return paths.stream()
-                    .map(API.<String, JarFile>unchecked(JarFile::new))
-                    .collect(collectingAndThen(toMap(identity(), JarFile::stream), this::determineClassMessages));
-    }
-
-    private Stream<ClassMessage> determineClassMessages(Map<JarFile, Stream<JarEntry>> jars) {
-        return jars.entrySet()
-                   .parallelStream()
-                   .flatMap(this::forEachEntry);
-    }
-
-    private Stream<ClassMessage> forEachEntry(Map.Entry<JarFile, Stream<JarEntry>> entry) {
-        return entry.getValue()
-                    .filter(predicate(Function($::isClassFileType).compose(JarEntry::getName))
-                            .and(negate(Function($::isAnonymousClass).compose(JarEntry::getName)))
-                            .and(predicate(Function($::matchPackages).apply(includePackages).compose(JarEntry::getName)))
-                            .and(negate(Function($::matchPackages).apply(excludePackages).compose(JarEntry::getName))))
-                    .map(Function($::getClassInputStream).apply(entry))
-                    .map(Function($::determineClassMessage).apply(visibility));
+    private Stream<ClassMessage> calcClassMessage(String path) {
+        return resolvers.stream()
+                        .filter(predicate(Function(ClassFileTypeResolver::isTypeMatch).reversed()
+                                                                                      .apply(path)))
+                        .flatMap(Function(ClassFileTypeResolver::scan).reversed()
+                                                                      .apply(configuration, path));
     }
 
 }

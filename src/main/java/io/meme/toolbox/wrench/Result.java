@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.*;
 
 /**
  * @author meme
- * @since 2018/7/30
+ * @since 1.0
  */
 @Getter
 @AllArgsConstructor(staticName = "of")
@@ -36,12 +36,12 @@ public class Result {
     }
 
     public Result byTypes(Class<?>... classes) {
-        return byTypes($.listClassNames(classes)).stream()
+        return byTypes(listClassNames(classes)).stream()
                                                  .collect($.toResult());
     }
 
     public Result byNames(Class<?>... classes) {
-        return by($.listClassNames(classes).toArray(), ClassMessage::getName);
+        return by(listClassNames(classes).toArray(), ClassMessage::getName);
     }
 
     public Result byPackages(String... packageNames) {
@@ -79,6 +79,13 @@ public class Result {
         return Stream.concat(classMessage.getInterfaceNames().stream(), Stream.of(classMessage.getSuperClassName(), classMessage.getName()))
                      .anyMatch(isIn(classNames.toArray()));
     }
+
+    private List<String> listClassNames(Class<?>... className) {
+        return Stream.of(className)
+                     .map(Class::getName)
+                     .collect(toList());
+    }
+
 
 
 }

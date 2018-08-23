@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * @author meme
- * @since 2018/7/23
+ * @since 1.0
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)

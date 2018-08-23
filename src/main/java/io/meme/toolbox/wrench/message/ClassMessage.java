@@ -1,5 +1,6 @@
 package io.meme.toolbox.wrench.message;
 
+import io.meme.toolbox.wrench.Configuration;
 import io.meme.toolbox.wrench.message.resolver.ClassResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
@@ -25,7 +26,7 @@ import java.util.stream.IntStream;
 
 /**
  * @author meme
- * @since 2018/7/23
+ * @since 1.0
  */
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
@@ -47,7 +48,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
     @Getter
     private List<FieldMessage> fieldMessages = new ArrayList<>();
 
-    private final int visibility;
+    private final Configuration configuration;
 
     //FIXME for array type
     public static ClassMessage of(Class<?> clazz) {
@@ -56,7 +57,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @SneakyThrows
     public static ClassMessage of(String className) {
-        return $.getClassMessage($.VISIBLE, new ClassReader(className));
+        return $.getClassMessage(Configuration.preset(), new ClassReader(className));
     }
 
     public boolean isFinal() {
@@ -101,7 +102,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> $.isEnableVisibleField(visibility));
+        return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> configuration.isEnableVisibleField());
     }
 
     private FieldMessage calcFieldMessage(String name, String desc, int access) {
@@ -112,7 +113,7 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return visitAndReturn(access, name, desc, this::calcMethodMessage, ignore -> $.isEnableVisibleMethod(visibility));
+        return visitAndReturn(access, name, desc, this::calcMethodMessage, ignore -> configuration.isEnableVisibleMethod());
     }
 
     private <T> T visitAndReturn(int access, String name, String desc, Function3<String, String, Integer, T> messageGenerator, Predicate<Integer> isAccessIgnore) {
@@ -151,7 +152,12 @@ public class ClassMessage extends ClassResolver implements Serializable {
 
     private static int calcPreIndex(int index, Type[] paramTypes, int i) {
         int preIndex = calcIndex(index, paramTypes, i);
-        return $.isWideType(paramTypes[i]) ? preIndex + 2 : preIndex + 1;
+        return isWideType(paramTypes[i]) ? preIndex + 2 : preIndex + 1;
+    }
+
+
+    private static boolean isWideType(Type type) {
+        return Objects.equals(type, Type.LONG_TYPE) || Objects.equals(type, Type.DOUBLE_TYPE);
     }
 
     @Override

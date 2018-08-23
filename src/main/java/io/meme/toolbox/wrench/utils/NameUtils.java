@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 
 /**
  * @author meme
- * @since 2018/7/27
+ * @since 1.0
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NameUtils {

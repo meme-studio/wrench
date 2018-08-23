@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @author meme
- * @since 2018/7/26
+ * @since 1.0
  */
 @Getter
 @AllArgsConstructor(staticName = "of")

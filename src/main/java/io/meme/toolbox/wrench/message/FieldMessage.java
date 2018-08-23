@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier;
 
 /**
  * @author meme
- * @since 2018/7/27
+ * @since 1.0
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)

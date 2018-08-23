@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author meme
- * @since 2018/8/6
+ * @since 1.0
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Asserts {

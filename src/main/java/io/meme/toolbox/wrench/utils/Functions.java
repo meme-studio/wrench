@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 
 /**
  * @author meme
- * @since 2018/8/3
+ * @since 1.0
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Functions {
