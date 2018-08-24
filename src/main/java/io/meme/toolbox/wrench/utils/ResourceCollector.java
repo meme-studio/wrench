@@ -17,10 +17,10 @@ public class ResourceCollector implements Closeable {
 
     private static final ResourceCollector RESOURCES = new ResourceCollector();
 
-    private List<Closeable> streams = new CopyOnWriteArrayList<>();
+    private List<Closeable> closeables = new CopyOnWriteArrayList<>();
 
     public static void collect(Closeable closeable) {
-        RESOURCES.streams.add(closeable);
+        RESOURCES.closeables.add(closeable);
     }
 
     public static ResourceCollector collector() {
@@ -29,15 +29,15 @@ public class ResourceCollector implements Closeable {
 
     @Override
     public void close() {
-        streams.stream()
-               .filter(Objects::nonNull)
-               .forEach(closeable -> {
+        closeables.stream()
+                  .filter(Objects::nonNull)
+                  .forEach(closeable -> {
                    try {
                        closeable.close();
                    }
                    catch (Throwable ignored) {}
                });
-        streams.clear();
+        closeables.clear();
     }
 
 }
