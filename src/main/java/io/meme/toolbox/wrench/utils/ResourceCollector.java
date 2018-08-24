@@ -31,13 +31,15 @@ public class ResourceCollector implements Closeable {
     public void close() {
         closeables.stream()
                   .filter(Objects::nonNull)
-                  .forEach(closeable -> {
-                   try {
-                       closeable.close();
-                   }
-                   catch (Throwable ignored) {}
-               });
+                  .forEach(this::close);
         closeables.clear();
+    }
+
+    private void close(Closeable closeable) {
+        try {
+            closeable.close();
+        }
+        catch (Throwable ignored) {}
     }
 
 }
