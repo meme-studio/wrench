@@ -92,6 +92,7 @@ public final class Wrench {
     }
 
     private Stream<ClassMessage> calcClassMessage(Path path) {
+        //为了能够保证流正常关闭，此处声明了资源回收器，为了兼顾效率和流式处理，此回收器在无资源回收时也会创建。
         @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return resolvers.stream()
                         .filter(predicate(Function(ClassFileResolver::isTypeMatched).reversed()
