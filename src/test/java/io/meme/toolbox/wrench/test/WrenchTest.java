@@ -28,7 +28,12 @@ class WrenchTest {
     }
 
     @Test
-    void includeAllInvisible() {
+    void visible() {
+        Result result = Wrench.wrench()
+                              .visible()
+                              .includePackages("java.lang")
+                              .scan();
+        System.out.println();
     }
 
     @Test

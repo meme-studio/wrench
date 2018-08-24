@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.0
  */
 @NoArgsConstructor(staticName = "collector")
-public class ResourceCollector implements Closeable {
+public final class ResourceCollector implements Closeable {
 
     private List<Closeable> closeables = new CopyOnWriteArrayList<>();
 

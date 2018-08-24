@@ -62,6 +62,6 @@ public class JarResolver implements ClassFileResolver {
 
     @Override
     public boolean isTypeMatched(Path path) {
-        return Stream.of(".jar", ".war", ".ear").anyMatch(path.toString()::endsWith);
+        return Stream.of(".jar").anyMatch(path.toString()::endsWith);
     }
 }
