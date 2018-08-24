@@ -9,8 +9,10 @@ import io.meme.toolbox.wrench.resolver.ClassResolver;
 import io.meme.toolbox.wrench.resolver.JarResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
+import io.meme.toolbox.wrench.utils.ResourceCollector;
 import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 
 import java.io.InputStream;
@@ -77,6 +79,7 @@ public final class Wrench {
     }
 
     public Result scan() {
+        @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return providers.stream()
                         .map(ClassPathProvider::listClassPaths)
                         .flatMap(Collection::stream)

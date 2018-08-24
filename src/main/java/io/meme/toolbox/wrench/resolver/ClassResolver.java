@@ -1,6 +1,10 @@
 package io.meme.toolbox.wrench.resolver;
 
+import io.meme.toolbox.wrench.utils.ResourceCollector;
+
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -17,7 +21,13 @@ public class ClassResolver implements ClassFileResolver {
     public Stream<InputStream> resolve(Path path) {
         return Stream.of(path)
                      .map(Path::toFile)
-                     .map(unchecked(FileInputStream::new));
+                     .map(unchecked(this::getFileInputStream));
+    }
+
+    private FileInputStream getFileInputStream(File file) throws FileNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(file);
+        ResourceCollector.collect(fileInputStream);
+        return fileInputStream;
     }
 
     @Override
