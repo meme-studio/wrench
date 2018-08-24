@@ -33,5 +33,4 @@ public final class $ {
         return className.matches("^.*[$]\\d+.*$");
     }
 
-
 }

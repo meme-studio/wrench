@@ -1,6 +1,5 @@
 package io.meme.toolbox.wrench.utils;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.io.Closeable;
@@ -12,19 +11,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author meme
  * @since 1.0
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(staticName = "collector")
 public class ResourceCollector implements Closeable {
-
-    private static final ResourceCollector RESOURCES = new ResourceCollector();
 
     private List<Closeable> closeables = new CopyOnWriteArrayList<>();
 
-    public static void collect(Closeable closeable) {
-        RESOURCES.closeables.add(closeable);
-    }
-
-    public static ResourceCollector collector() {
-        return RESOURCES;
+    public void collect(Closeable closeable) {
+        closeables.add(closeable);
     }
 
     @Override

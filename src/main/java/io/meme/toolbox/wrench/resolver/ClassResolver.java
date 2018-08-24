@@ -18,15 +18,15 @@ import static io.vavr.API.unchecked;
 public class ClassResolver implements ClassFileResolver {
 
     @Override
-    public Stream<InputStream> resolve(Path path) {
+    public Stream<InputStream> resolve(Path path, ResourceCollector collector) {
         return Stream.of(path)
                      .map(Path::toFile)
-                     .map(unchecked(this::getFileInputStream));
+                     .map(unchecked(this::getFileInputStream).apply(collector));
     }
 
-    private FileInputStream getFileInputStream(File file) throws FileNotFoundException {
+    private FileInputStream getFileInputStream(ResourceCollector collector, File file) throws FileNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(file);
-        ResourceCollector.collect(fileInputStream);
+        collector.collect(fileInputStream);
         return fileInputStream;
     }
 

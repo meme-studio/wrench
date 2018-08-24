@@ -79,7 +79,6 @@ public final class Wrench {
     }
 
     public Result scan() {
-        @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return providers.stream()
                         .map(ClassPathProvider::listClassPaths)
                         .flatMap(Collection::stream)
@@ -93,13 +92,13 @@ public final class Wrench {
     }
 
     private Stream<ClassMessage> calcClassMessage(Path path) {
+        @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return resolvers.stream()
                         .filter(predicate(Function(ClassFileResolver::isTypeMatched).reversed()
                                                                                     .apply(path)))
-                        .flatMap(Function(ClassFileResolver::resolve).reversed().apply(path))
+                        .flatMap(Function(ClassFileResolver::resolve).reversed().apply(collector, path))
                         .map(Function(this::determineClassMessage));
     }
-
 
     private ClassMessage determineClassMessage(InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()

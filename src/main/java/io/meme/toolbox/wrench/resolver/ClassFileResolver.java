@@ -1,5 +1,7 @@
 package io.meme.toolbox.wrench.resolver;
 
+import io.meme.toolbox.wrench.utils.ResourceCollector;
+
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -10,7 +12,7 @@ import java.util.stream.Stream;
  */
 public interface ClassFileResolver {
 
-    Stream<InputStream> resolve(Path path);
+    Stream<InputStream> resolve(Path path, ResourceCollector collector);
 
     boolean isTypeMatched(Path path);
 
