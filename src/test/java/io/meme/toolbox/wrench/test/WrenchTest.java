@@ -14,7 +14,7 @@ class WrenchTest {
     void includeInvisibleMethod() {
         Result result = Wrench.wrench()
                               .includeInvisibleMethod()
-                              .includePackages("io.meme.toolbox.wrench")
+                              .includePackages("java.lang")
                               .scan();
         System.out.println();
     }

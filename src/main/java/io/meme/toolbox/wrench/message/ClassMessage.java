@@ -1,7 +1,7 @@
 package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.Configuration;
-import io.meme.toolbox.wrench.message.visitor.Asm5ClassVisitor;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
@@ -12,15 +12,12 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Type;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.experimental.ExtensionMethod;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -32,20 +29,9 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @RequiredArgsConstructor(staticName = "of")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-@ExtensionMethod({AccessUtils.class, Arrays.class})
-public class ClassMessage extends Asm5ClassVisitor implements Serializable {
+public class ClassMessage extends SimpleClassMessageVisitor implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
 
-    @EqualsAndHashCode.Include
-    @Getter
-    private String name;
-    private int access;
-    private String signature;
-    @Getter
-    private String superClassName;
-    @Getter
-    private List<String> interfaceNames;
     @Getter
     private List<MethodMessage> methodMessages = new ArrayList<>();
     @Getter
@@ -89,18 +75,6 @@ public class ClassMessage extends Asm5ClassVisitor implements Serializable {
 
     public boolean isStatic() {
         return AccessUtils.isStatic(access);
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        this.name = NameUtils.calcInternalName(name);
-        this.signature = signature;
-        this.access = access;
-        this.superClassName = Option.of(superName)
-                                    .filter(Objects::nonNull)
-                                    .map(NameUtils::calcInternalName)
-                                    .getOrNull();
-        this.interfaceNames = Arrays.asList(NameUtils.calcInternalNames(interfaces));
     }
 
     @Override
@@ -163,9 +137,5 @@ public class ClassMessage extends Asm5ClassVisitor implements Serializable {
         return Objects.equals(type, Type.LONG_TYPE) || Objects.equals(type, Type.DOUBLE_TYPE);
     }
 
-    @Override
-    public String toString() {
-        return getName();
-    }
 }
 

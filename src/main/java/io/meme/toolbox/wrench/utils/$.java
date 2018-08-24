@@ -7,12 +7,8 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.InputStream;
 import java.util.stream.Collector;
 
-import static io.meme.toolbox.wrench.utils.Functions.predicate;
-import static io.vavr.API.Function;
-import static io.vavr.API.Try;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -33,21 +29,9 @@ public final class $ {
         return collectingAndThen(toList(), Result::of);
     }
 
-    public static boolean isAnonymousClass(String path) {
-        return path.matches("^.*[$]\\d+.*$");
+    public static boolean isAnonymousClass(String className) {
+        return className.matches("^.*[$]\\d+.*$");
     }
-
-    public static ClassMessage determineClassMessage(Configuration configuration, InputStream is) {
-        return Try(() -> new ClassReader(is)).toOption()
-                                             .filter(predicate(Function($::matchLimited).apply(configuration)))
-                                             .map(Function($::getClassMessage).apply(configuration))
-                                             .getOrNull();
-    }
-
-    private static boolean matchLimited(Configuration configuration, ClassReader reader) {
-        return configuration.isEnableVisibleClass() || AccessUtils.isPublic(reader.getAccess());
-    }
-
 
 
 }

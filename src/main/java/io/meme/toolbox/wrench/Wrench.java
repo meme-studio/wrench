@@ -3,13 +3,17 @@ package io.meme.toolbox.wrench;
 import io.meme.toolbox.wrench.classpath.ClassPathProvider;
 import io.meme.toolbox.wrench.classpath.DefaultClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
+import io.meme.toolbox.wrench.resolver.ClassFileResolver;
 import io.meme.toolbox.wrench.resolver.ClassResolver;
-import io.meme.toolbox.wrench.resolver.ClassTypeResolver;
 import io.meme.toolbox.wrench.resolver.JarResolver;
 import io.meme.toolbox.wrench.utils.$;
+import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.vavr.API;
+import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.NoArgsConstructor;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
 import static io.vavr.API.Function;
+import static io.vavr.API.Try;
 
 /**
  * Wrench是一个基于ow2 asm驱动的类扫描与解析工具。
@@ -30,7 +35,7 @@ import static io.vavr.API.Function;
 public final class Wrench {
 
     private Configuration configuration = Configuration.preset();
-    private List<ClassTypeResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
+    private List<ClassFileResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
     private List<ClassPathProvider> providers = Collections.singletonList(new DefaultClassPathProvider());
 
     /**
@@ -78,19 +83,39 @@ public final class Wrench {
                         .map(Paths::get)
                         .flatMap(API.<Path, Stream<Path>>unchecked(Files::walk))
                         .parallel()
-                        .map(Path::toString)
                         .flatMap(this::calcClassMessage)
                         .filter(Objects::nonNull)
                         .distinct()
                         .collect($.toResult());
     }
 
-    private Stream<ClassMessage> calcClassMessage(String path) {
+    private Stream<ClassMessage> calcClassMessage(Path path) {
         return resolvers.stream()
-                        .filter(predicate(Function(ClassTypeResolver::isTypeMatched).reversed()
+                        .filter(predicate(Function(ClassFileResolver::isTypeMatched).reversed()
                                                                                     .apply(path)))
-                        .flatMap(Function(ClassTypeResolver::resolve).reversed()
-                                                                     .apply(configuration, path));
+                        .flatMap(Function(ClassFileResolver::resolve).reversed().apply(path))
+                        .map(Function(this::determineClassMessage));
+    }
+
+
+    private ClassMessage determineClassMessage(InputStream is) {
+        return Try(() -> new ClassReader(is)).toOption()
+                                             .filter(predicate(this::filter))
+                                             .map(Function($::getClassMessage).apply(configuration))
+                                             .getOrNull();
+    }
+
+    private boolean filter(ClassReader reader) {
+        SimpleClassMessageVisitor visitor = getSimpleClassMessageVisitor(reader);
+        return !$.isAnonymousClass(visitor.getName())
+                && (!configuration.isPackageExcluded(visitor.getName()) && configuration.isPackageIncluded(visitor.getName()))
+                && (configuration.isEnableVisibleClass() || AccessUtils.isPublic(reader.getAccess()));
+    }
+
+    private static SimpleClassMessageVisitor getSimpleClassMessageVisitor(ClassReader reader) {
+        SimpleClassMessageVisitor visitor = new SimpleClassMessageVisitor();
+        reader.accept(visitor, ClassReader.SKIP_FRAMES);
+        return visitor;
     }
 
 }
