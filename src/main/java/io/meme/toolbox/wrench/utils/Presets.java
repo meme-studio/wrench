@@ -30,9 +30,9 @@ public final class Presets {
 
     private static <T> List<T> getDefaultComponents(String componentName, Class<T> componentType) {
         return Arrays.stream(getProperty(componentName).split(","))
-                     .map(API.<String, Class>unchecked(Class::forName))
-                     .map(unchecked(Class::newInstance))
-                     .map(cast(componentType))
+                     .map(API.<String, Class>unchecked(Class::forName)
+                             .andThen(unchecked(Class::newInstance))
+                             .andThen(cast(componentType)))
                      .collect(Collectors.toList());
     }
 
