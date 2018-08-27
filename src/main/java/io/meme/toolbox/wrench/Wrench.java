@@ -1,14 +1,12 @@
 package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.classpath.ClassPathProvider;
-import io.meme.toolbox.wrench.classpath.DefaultClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
 import io.meme.toolbox.wrench.resolver.file.FileResolver;
-import io.meme.toolbox.wrench.resolver.file.ClassResolver;
-import io.meme.toolbox.wrench.resolver.file.JarResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
+import io.meme.toolbox.wrench.utils.Presets;
 import io.meme.toolbox.wrench.utils.ResourceCollector;
 import io.vavr.API;
 import jdk.internal.org.objectweb.asm.ClassReader;
@@ -20,7 +18,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static io.meme.toolbox.wrench.utils.Functions.predicate;
@@ -38,8 +39,8 @@ import static io.vavr.API.Try;
 public final class Wrench {
 
     private Configuration configuration = Configuration.preset();
-    private List<FileResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
-    private List<ClassPathProvider> providers = Collections.singletonList(new DefaultClassPathProvider());
+    private List<FileResolver> resolvers = Presets.defaultFileResolvers();
+    private List<ClassPathProvider> providers = Presets.defaultClassPathProviders();
 
     /**
      * 只包含公开的类，成员变量与成员方法。

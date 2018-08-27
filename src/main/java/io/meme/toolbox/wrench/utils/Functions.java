@@ -26,4 +26,8 @@ public final class Functions {
         return predicate::test;
     }
 
+    public static <T, U> Function<T, U> cast(Class<U> type) {
+        return type::cast;
+    }
+
 }
