@@ -3,6 +3,7 @@ package io.meme.toolbox.wrench.utils;
 import io.meme.toolbox.wrench.Configuration;
 import io.meme.toolbox.wrench.Result;
 import io.meme.toolbox.wrench.message.ClassMessage;
+import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -20,9 +21,14 @@ import static java.util.stream.Collectors.toList;
 public final class $ {
 
     public static ClassMessage getClassMessage(Configuration configuration, ClassReader reader) {
-        ClassMessage classMessage = ClassMessage.of(configuration);
+        return Option.of(configuration)
+                     .map(ClassMessage::of)
+                     .peek(classMessage -> calcMessage(reader, classMessage))
+                     .getOrElseThrow(IllegalArgumentException::new);
+    }
+
+    private static void calcMessage(ClassReader reader, ClassMessage classMessage) {
         reader.accept(classMessage, ClassReader.SKIP_FRAMES);
-        return classMessage;
     }
 
     public static Collector<ClassMessage, ?, Result> toResult() {
@@ -31,6 +37,14 @@ public final class $ {
 
     public static boolean isAnonymousClass(String className) {
         return className.matches("^.*[$]\\d+.*$");
+    }
+
+    public static boolean isTypeOf(String fileName, String fileType) {
+        return fileName.regionMatches(true, fileName.length() - fileType.length(), fileType, 0, fileType.length());
+    }
+
+    public static boolean isClassFileType(String path) {
+        return $.isTypeOf(path, ".class");
     }
 
 }

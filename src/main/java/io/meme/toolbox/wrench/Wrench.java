@@ -4,9 +4,9 @@ import io.meme.toolbox.wrench.classpath.ClassPathProvider;
 import io.meme.toolbox.wrench.classpath.DefaultClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
 import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
-import io.meme.toolbox.wrench.resolver.ClassFileResolver;
-import io.meme.toolbox.wrench.resolver.ClassResolver;
-import io.meme.toolbox.wrench.resolver.JarResolver;
+import io.meme.toolbox.wrench.resolver.file.FileResolver;
+import io.meme.toolbox.wrench.resolver.file.ClassResolver;
+import io.meme.toolbox.wrench.resolver.file.JarResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.ResourceCollector;
@@ -15,6 +15,7 @@ import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 
+import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ import static io.vavr.API.Try;
 public final class Wrench {
 
     private Configuration configuration = Configuration.preset();
-    private List<ClassFileResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
+    private List<FileResolver> resolvers = Arrays.asList(new ClassResolver(), new JarResolver());
     private List<ClassPathProvider> providers = Collections.singletonList(new DefaultClassPathProvider());
 
     /**
@@ -84,6 +85,7 @@ public final class Wrench {
                         .flatMap(Collection::stream)
                         .map(Paths::get)
                         .flatMap(API.<Path, Stream<Path>>unchecked(Files::walk))
+                        .map(Path::toFile)
                         .parallel()
                         .flatMap(this::calcClassMessage)
                         .filter(Objects::nonNull)
@@ -91,14 +93,20 @@ public final class Wrench {
                         .collect($.toResult());
     }
 
-    private Stream<ClassMessage> calcClassMessage(Path path) {
+    private Stream<ClassMessage> calcClassMessage(File file) {
         //为了能够保证流正常关闭，此处声明了资源回收器，为了兼顾效率和流式处理，此回收器在无资源回收时也会创建。
         @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return resolvers.stream()
-                        .filter(predicate(Function(ClassFileResolver::isTypeMatched).reversed()
-                                                                                    .apply(path)))
-                        .flatMap(Function(ClassFileResolver::resolve).reversed().apply(collector, path))
+                        .filter(predicate(Function(this::matchesType).apply(file)
+                                                                     .compose(FileResolver::supportsTypes)))
+                        .flatMap(Function(FileResolver::resolve).reversed()
+                                                                .apply(collector, file))
                         .map(Function(this::determineClassMessage));
+    }
+
+    private boolean matchesType(File file, List<String> supportsTypes) {
+        return supportsTypes.stream()
+                            .anyMatch(predicate(Function($::isTypeOf).apply(file.getAbsolutePath())));
     }
 
     private ClassMessage determineClassMessage(InputStream is) {
