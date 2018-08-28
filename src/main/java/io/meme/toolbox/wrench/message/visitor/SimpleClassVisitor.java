@@ -14,7 +14,7 @@ import java.util.Objects;
  * @since 1.0
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class SimpleClassMessageVisitor extends Asm5ClassVisitor {
+public class SimpleClassVisitor extends Asm5ClassVisitor {
     @EqualsAndHashCode.Include
     @Getter
     protected String name;

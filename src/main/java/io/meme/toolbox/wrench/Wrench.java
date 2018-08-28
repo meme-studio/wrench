@@ -2,7 +2,7 @@ package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.classpath.ClassPathProvider;
 import io.meme.toolbox.wrench.message.ClassMessage;
-import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassVisitor;
 import io.meme.toolbox.wrench.resolver.file.FileResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
@@ -39,8 +39,8 @@ import static io.vavr.API.Try;
 public final class Wrench {
 
     private Configuration configuration = Configuration.preset();
-    private List<FileResolver> resolvers = Presets.defaultFileResolvers();
-    private List<ClassPathProvider> providers = Presets.defaultClassPathProviders();
+    private List<FileResolver> resolvers = Presets.DEFAULT_FILE_RESOLVERS;
+    private List<ClassPathProvider> providers = Presets.DEFAULT_CLASS_PATH_PROVIDERS;
 
     /**
      * 只包含公开的类，成员变量与成员方法。
@@ -118,14 +118,14 @@ public final class Wrench {
     }
 
     private boolean filter(ClassReader reader) {
-        SimpleClassMessageVisitor visitor = getSimpleClassMessageVisitor(reader);
+        SimpleClassVisitor visitor = getSimpleClassMessageVisitor(reader);
         return !$.isAnonymousClass(visitor.getName())
                 && (!configuration.isPackageExcluded(visitor.getName()) && configuration.isPackageIncluded(visitor.getName()))
                 && (configuration.isEnableVisibleClass() || AccessUtils.isPublic(reader.getAccess()));
     }
 
-    private static SimpleClassMessageVisitor getSimpleClassMessageVisitor(ClassReader reader) {
-        SimpleClassMessageVisitor visitor = new SimpleClassMessageVisitor();
+    private static SimpleClassVisitor getSimpleClassMessageVisitor(ClassReader reader) {
+        SimpleClassVisitor visitor = new SimpleClassVisitor();
         reader.accept(visitor, ClassReader.SKIP_FRAMES);
         return visitor;
     }

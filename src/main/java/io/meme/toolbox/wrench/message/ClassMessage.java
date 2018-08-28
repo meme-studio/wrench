@@ -1,7 +1,7 @@
 package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.Configuration;
-import io.meme.toolbox.wrench.message.visitor.SimpleClassMessageVisitor;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassVisitor;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @RequiredArgsConstructor(staticName = "of")
-public class ClassMessage extends SimpleClassMessageVisitor implements Serializable {
+public class ClassMessage extends SimpleClassVisitor implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
 
     @Getter

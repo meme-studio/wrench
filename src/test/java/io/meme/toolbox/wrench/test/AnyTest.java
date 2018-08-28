@@ -1,19 +1,25 @@
 package io.meme.toolbox.wrench.test;
 
-import io.meme.toolbox.wrench.Wrench;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Properties;
+import java.io.File;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.util.jar.JarFile;
 
 class AnyTest {
 
     @Test
-    void any() throws URISyntaxException, IOException {
-        Properties properties = new Properties();
-        properties.load(Wrench.class.getResourceAsStream("wrench.properties"));
-        Arrays.stream(properties.getProperty("wrench.resolvers").split(",")).forEach(System.out::println);
+    @SneakyThrows
+    void any() {
+        URI uri1 = new File("res").toURI();
+        URL url = new URL("jar:file:/data/spring-boot-theory.jar!/BOOT-INF/lib/spring-aop-5.0.4.RELEASE.jar!/org/springframework/aop/SpringProxy.class");
+        JarURLConnection urlConnection = (JarURLConnection) url.openConnection();
+        URI uri = url.toURI();
+
+        JarFile jarFile = urlConnection.getJarFile();
+        System.out.println();
     }
 }
