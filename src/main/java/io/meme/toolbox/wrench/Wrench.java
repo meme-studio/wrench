@@ -1,8 +1,8 @@
 package io.meme.toolbox.wrench;
 
 import io.meme.toolbox.wrench.classpath.ClassPathProvider;
-import io.meme.toolbox.wrench.message.ClassMessage;
-import io.meme.toolbox.wrench.message.visitor.SimpleClassVisitor;
+import io.meme.toolbox.wrench.message.ClassInfo;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassInfo;
 import io.meme.toolbox.wrench.resolver.file.FileResolver;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
@@ -94,7 +94,7 @@ public final class Wrench {
                         .collect($.toResult());
     }
 
-    private Stream<ClassMessage> calcClassMessage(File file) {
+    private Stream<ClassInfo> calcClassMessage(File file) {
         //为了能够保证流正常关闭，此处声明了资源回收器，为了兼顾效率和流式处理，此回收器在无资源回收时也会创建。
         @Cleanup ResourceCollector collector = ResourceCollector.collector();
         return resolvers.stream()
@@ -102,7 +102,7 @@ public final class Wrench {
                                                                      .compose(FileResolver::supportsTypes)))
                         .flatMap(Function(FileResolver::resolve).reversed()
                                                                 .apply(collector, file))
-                        .map(Function(this::determineClassMessage));
+                        .map(Function(this::determineClassInfo));
     }
 
     private boolean matchesType(File file, List<String> supportsTypes) {
@@ -110,22 +110,22 @@ public final class Wrench {
                             .anyMatch(predicate(Function($::isTypeOf).apply(file.getAbsolutePath())));
     }
 
-    private ClassMessage determineClassMessage(InputStream is) {
+    private ClassInfo determineClassInfo(InputStream is) {
         return Try(() -> new ClassReader(is)).toOption()
                                              .filter(predicate(this::filter))
-                                             .map(Function($::getClassMessage).apply(configuration))
+                                             .map(Function($::getClassInfo).apply(configuration))
                                              .getOrNull();
     }
 
     private boolean filter(ClassReader reader) {
-        SimpleClassVisitor visitor = getSimpleClassMessageVisitor(reader);
+        SimpleClassInfo visitor = getSimpleClassInfo(reader);
         return !$.isAnonymousClass(visitor.getName())
                 && (!configuration.isPackageExcluded(visitor.getName()) && configuration.isPackageIncluded(visitor.getName()))
                 && (configuration.isEnableVisibleClass() || AccessUtils.isPublic(reader.getAccess()));
     }
 
-    private static SimpleClassVisitor getSimpleClassMessageVisitor(ClassReader reader) {
-        SimpleClassVisitor visitor = new SimpleClassVisitor();
+    private static SimpleClassInfo getSimpleClassInfo(ClassReader reader) {
+        SimpleClassInfo visitor = new SimpleClassInfo();
         reader.accept(visitor, ClassReader.SKIP_FRAMES);
         return visitor;
     }

@@ -1,6 +1,6 @@
 package io.meme.toolbox.wrench;
 
-import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.message.ClassInfo;
 import io.meme.toolbox.wrench.utils.$;
 import io.vavr.Function2;
 import lombok.AllArgsConstructor;
@@ -27,11 +27,11 @@ import static java.util.stream.Collectors.*;
 @AllArgsConstructor(staticName = "of")
 public class Result {
 
-    private final List<ClassMessage> classMessages;
+    private final List<ClassInfo> classMessages;
 
     public Set<String> listClassNames() {
         return classMessages.stream()
-                            .map(ClassMessage::getName)
+                            .map(ClassInfo::getName)
                             .collect(Collectors.toSet());
     }
 
@@ -41,41 +41,41 @@ public class Result {
     }
 
     public Result byNames(Class<?>... classes) {
-        return by(listClassNames(classes).toArray(), ClassMessage::getName);
+        return by(listClassNames(classes).toArray(), ClassInfo::getName);
     }
 
     public Result byPackages(String... packageNames) {
-        return by(packageNames, ClassMessage::getPackageName);
+        return by(packageNames, ClassInfo::getPackageName);
     }
 
-    public Map<String, List<ClassMessage>> groupingByPackageName() {
+    public Map<String, List<ClassInfo>> groupingByPackageName() {
         return classMessages.stream()
-                            .collect(groupingBy(ClassMessage::getPackageName));
+                            .collect(groupingBy(ClassInfo::getPackageName));
     }
 
-    private <T> Result by(T[] conditions, Function<ClassMessage, T> function) {
+    private <T> Result by(T[] conditions, Function<ClassInfo, T> function) {
         return classMessages.stream()
                             .filter(predicate(function(isIn(conditions)).compose(function)))
                             .collect($.toResult());
     }
 
-    private List<ClassMessage> byTypes(List<String> types) {
+    private List<ClassInfo> byTypes(List<String> types) {
         return classMessages.stream()
                             .filter(predicate(Function2.of(this::isMatchTypes).apply(types)))
-                            .collect(collectingAndThen(toList(), Function2.<List<String>, List<ClassMessage>, List<ClassMessage>>of(this::byTypes).apply(types)));
+                            .collect(collectingAndThen(toList(), Function2.<List<String>, List<ClassInfo>, List<ClassInfo>>of(this::byTypes).apply(types)));
     }
 
-    private List<ClassMessage> byTypes(List<String> types, List<ClassMessage> classMessages) {
+    private List<ClassInfo> byTypes(List<String> types, List<ClassInfo> classMessages) {
         return Objects.equals(classMessages.size(), types.size()) ? classMessages : byTypes(listClassNames(classMessages));
     }
 
-    private List<String> listClassNames(List<ClassMessage> classMessages) {
+    private List<String> listClassNames(List<ClassInfo> classMessages) {
         return classMessages.stream()
-                            .map(ClassMessage::getName)
+                            .map(ClassInfo::getName)
                             .collect(toList());
     }
 
-    private boolean isMatchTypes(List<String> classNames, ClassMessage classMessage) {
+    private boolean isMatchTypes(List<String> classNames, ClassInfo classMessage) {
         return Stream.concat(classMessage.getInterfaceNames().stream(), Stream.of(classMessage.getSuperClassName(), classMessage.getName()))
                      .anyMatch(isIn(classNames.toArray()));
     }

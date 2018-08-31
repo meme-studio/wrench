@@ -2,7 +2,7 @@ package io.meme.toolbox.wrench.utils;
 
 import io.meme.toolbox.wrench.Configuration;
 import io.meme.toolbox.wrench.Result;
-import io.meme.toolbox.wrench.message.ClassMessage;
+import io.meme.toolbox.wrench.message.ClassInfo;
 import io.vavr.control.Option;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import lombok.AccessLevel;
@@ -20,18 +20,18 @@ import static java.util.stream.Collectors.toList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class $ {
 
-    public static ClassMessage getClassMessage(Configuration configuration, ClassReader reader) {
+    public static ClassInfo getClassInfo(Configuration configuration, ClassReader reader) {
         return Option.of(configuration)
-                     .map(ClassMessage::of)
+                     .map(ClassInfo::of)
                      .peek(classMessage -> calcMessage(reader, classMessage))
                      .getOrElseThrow(IllegalArgumentException::new);
     }
 
-    private static void calcMessage(ClassReader reader, ClassMessage classMessage) {
+    private static void calcMessage(ClassReader reader, ClassInfo classMessage) {
         reader.accept(classMessage, ClassReader.SKIP_FRAMES);
     }
 
-    public static Collector<ClassMessage, ?, Result> toResult() {
+    public static Collector<ClassInfo, ?, Result> toResult() {
         return collectingAndThen(toList(), Result::of);
     }
 

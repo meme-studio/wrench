@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.joining;
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class MethodMessage extends Asm5MethodVisitor implements Serializable {
+public class MethodInfo extends Asm5MethodVisitor implements Serializable {
     private static final long serialVersionUID = 1286151805906509943L;
     @Getter
     private final String className;
@@ -35,7 +35,7 @@ public class MethodMessage extends Asm5MethodVisitor implements Serializable {
     private final String returnType;
     private final int access;
     @Getter
-    private final List<ArgumentMessage> argumentMessages;
+    private final List<ArgumentInfo> argumentInfos;
 
     public boolean isFinal() {
         return AccessUtils.isFinal(access);
@@ -76,9 +76,9 @@ public class MethodMessage extends Asm5MethodVisitor implements Serializable {
     }
 
     private String getArgumentsDescription() {
-        return argumentMessages.stream()
-                               .map(argument -> String.format("%s %s", argument.getTypeName(), argument.getArgumentName()))
-                               .collect(joining(", ", "(", ")"));
+        return argumentInfos.stream()
+                            .map(argument -> String.format("%s %s", argument.getTypeName(), argument.getArgumentName()))
+                            .collect(joining(", ", "(", ")"));
     }
 
     private String getMethodPrefix() {
@@ -97,12 +97,12 @@ public class MethodMessage extends Asm5MethodVisitor implements Serializable {
 
     @Override
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        argumentMessages.stream()
-                        .filter(Functions.predicate(Function2.of(Objects::equals)
+        argumentInfos.stream()
+                     .filter(Functions.predicate(Function2.of(Objects::equals)
                                                              .apply(index)
-                                                             .compose(ArgumentMessage::getIndex)))
-                        .findAny()
-                        .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
+                                                             .compose(ArgumentInfo::getIndex)))
+                     .findAny()
+                     .ifPresent(argumentMessage -> argumentMessage.setArgumentName(name));
     }
 
 }

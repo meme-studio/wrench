@@ -16,7 +16,7 @@ import java.lang.reflect.Modifier;
  */
 @AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class FieldMessage extends Asm5FieldVisitor implements Serializable {
+public class FieldInfo extends Asm5FieldVisitor implements Serializable {
     private static final long serialVersionUID = 2648987017868206269L;
     @Getter
     private final String name;

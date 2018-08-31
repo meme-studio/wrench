@@ -1,7 +1,7 @@
 package io.meme.toolbox.wrench.message;
 
 import io.meme.toolbox.wrench.Configuration;
-import io.meme.toolbox.wrench.message.visitor.SimpleClassVisitor;
+import io.meme.toolbox.wrench.message.visitor.SimpleClassInfo;
 import io.meme.toolbox.wrench.utils.$;
 import io.meme.toolbox.wrench.utils.AccessUtils;
 import io.meme.toolbox.wrench.utils.NameUtils;
@@ -29,24 +29,24 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @RequiredArgsConstructor(staticName = "of")
-public class ClassMessage extends SimpleClassVisitor implements Serializable {
+public class ClassInfo extends SimpleClassInfo implements Serializable {
     private static final long serialVersionUID = -5621028783726663753L;
 
     @Getter
-    private List<MethodMessage> methodMessages = new ArrayList<>();
+    private List<MethodInfo> methodInfos = new ArrayList<>();
     @Getter
-    private List<FieldMessage> fieldMessages = new ArrayList<>();
+    private List<FieldInfo> fieldInfos = new ArrayList<>();
 
     private final Configuration configuration;
 
     //FIXME for array type
-    public static ClassMessage of(Class<?> clazz) {
+    public static ClassInfo of(Class<?> clazz) {
         return of(clazz.getTypeName());
     }
 
     @SneakyThrows
-    public static ClassMessage of(String className) {
-        return $.getClassMessage(Configuration.preset(), new ClassReader(className));
+    public static ClassInfo of(String className) {
+        return $.getClassInfo(Configuration.preset(), new ClassReader(className));
     }
 
     public boolean isFinal() {
@@ -82,9 +82,9 @@ public class ClassMessage extends SimpleClassVisitor implements Serializable {
         return visitAndReturn(access, name, desc, this::calcFieldMessage, ignore -> configuration.isEnableVisibleField());
     }
 
-    private FieldMessage calcFieldMessage(String name, String desc, int access) {
-        FieldMessage field = FieldMessage.of(name, NameUtils.calcInternalName(Type.getType(desc).getClassName()), access);
-        fieldMessages.add(field);
+    private FieldInfo calcFieldMessage(String name, String desc, int access) {
+        FieldInfo field = FieldInfo.of(name, NameUtils.calcInternalName(Type.getType(desc).getClassName()), access);
+        fieldInfos.add(field);
         return field;
     }
 
@@ -101,26 +101,26 @@ public class ClassMessage extends SimpleClassVisitor implements Serializable {
                      .getOrNull();
     }
 
-    private MethodMessage calcMethodMessage(String name, String desc, int access) {
-        List<ArgumentMessage> argumentMessages = calcArgumentMessages(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
-        MethodMessage method = MethodMessage.of(getName(), name, NameUtils.calcInternalName(Type.getReturnType(desc).getClassName()), access, argumentMessages);
-        methodMessages.add(method);
+    private MethodInfo calcMethodMessage(String name, String desc, int access) {
+        List<ArgumentInfo> argumentMessages = calcArgumentMessages(AccessUtils.isStatic(access), Type.getArgumentTypes(desc));
+        MethodInfo method = MethodInfo.of(getName(), name, NameUtils.calcInternalName(Type.getReturnType(desc).getClassName()), access, argumentMessages);
+        methodInfos.add(method);
         return method;
     }
 
     /**
      * Reference to Spring org.springframework.core.LocalVariableTableParameterNameDiscoverer.LocalVariableTableVisitor.computeLvtSlotIndices(boolean, org.springframework.asm.Type[])
      */
-    private static List<ArgumentMessage> calcArgumentMessages(boolean isStatic, Type[] paramTypes) {
+    private static List<ArgumentInfo> calcArgumentMessages(boolean isStatic, Type[] paramTypes) {
         return IntStream.range(0, paramTypes.length)
                         .boxed()
-                        .map(Function3.of(ClassMessage::calcArgumentMessage)
+                        .map(Function3.of(ClassInfo::calcArgumentMessage)
                                       .apply(isStatic ? 0 : 1, paramTypes))
                         .collect(Collectors.toList());
     }
 
-    private static ArgumentMessage calcArgumentMessage(int index, Type[] paramTypes, int i) {
-        return ArgumentMessage.of(paramTypes[i].getClassName(), String.format("arg%d", i), calcIndex(index, paramTypes, i));
+    private static ArgumentInfo calcArgumentMessage(int index, Type[] paramTypes, int i) {
+        return ArgumentInfo.of(paramTypes[i].getClassName(), String.format("arg%d", i), calcIndex(index, paramTypes, i));
     }
 
     private static int calcIndex(int index, Type[] paramTypes, int i) {
